@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Clock, Eye } from "lucide-react";
+import { Play, Clock, Eye, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VideoContent {
@@ -69,12 +69,24 @@ const TVSection = () => {
               >
                 <div className="aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
                   {playingId === replay.id ? (
-                    <video 
-                      src={replay.file_url || ""} 
-                      controls 
-                      autoPlay 
-                      className="w-full h-full object-contain bg-black"
-                    />
+                    <div className="relative w-full h-full group/player">
+                      <video 
+                        src={replay.file_url || ""} 
+                        controls 
+                        autoPlay 
+                        className="w-full h-full object-contain bg-black"
+                      />
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlayingId(null);
+                        }}
+                        className="absolute top-2 right-2 p-1 bg-black/60 hover:bg-black/90 text-white rounded-full opacity-0 group-hover/player:opacity-100 transition-opacity z-20"
+                        title="Fermer la vidéo"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
                   ) : (
                     <>
                       {replay.thumbnail_url ? (
