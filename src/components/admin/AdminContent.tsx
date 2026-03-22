@@ -122,5 +122,3 @@ const AdminContent = () => {
 };
 
 export default AdminContent;
-
-export default AdminContent;
