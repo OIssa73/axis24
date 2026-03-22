@@ -33,12 +33,27 @@ const AdminUpload = () => {
     fetchCategories();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileFn: (f: File | null) => void) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      if (selectedFile.size > maxSize) {
+        toast({
+          title: "Fichier trop volumineux",
+          description: "La limite de votre plan Supabase est de 50 Mo. Ce fichier ( " + (selectedFile.size / (1024 * 1024)).toFixed(1) + " Mo) ne pourra pas être envoyé.",
+          variant: "destructive",
+        });
+        e.target.value = ""; // Clear input
+        return;
+      }
+      setFileFn(selectedFile);
+    }
+  };
+
   const uploadFile = async (file: File, path: string) => {
-    // Note: Standard Supabase upload doesn't provide progress easily without TUS.
-    // For now, we simulate progress for UX while the file uploads in background.
     const interval = setInterval(() => {
-      setProgress((prev) => (prev < 90 ? prev + 10 : prev));
-    }, 500);
+      setProgress((prev) => (prev < 95 ? prev + 5 : prev));
+    }, 400);
 
     try {
       const { data, error } = await supabase.storage.from("media").upload(path, file);
@@ -90,7 +105,7 @@ const AdminUpload = () => {
 
       if (error) throw error;
 
-      toast({ title: "Contenu ajouté avec succès !" });
+      toast({ title: "Publication réussie !", description: "Votre contenu est maintenant en ligne." });
       setTitle("");
       setDescription("");
       setBody("");
@@ -100,11 +115,7 @@ const AdminUpload = () => {
       setProgress(0);
     } catch (err: any) {
       setProgress(0);
-      let errorMsg = err.message;
-      if (errorMsg.includes("exceeded the maximum size")) {
-        errorMsg = "Le fichier est trop volumineux (limite par défaut de 50Mo sur Supabase). Suivez les instructions pour augmenter la limite dans votre Dashboard Supabase.";
-      }
-      toast({ title: "Erreur d'upload", description: errorMsg, variant: "destructive" });
+      toast({ title: "Échec de l'envoi", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -196,36 +207,40 @@ const AdminUpload = () => {
       </div>
 
       {(type === "audio" || type === "video" || type === "image") && (
-        <div>
+        <div className="glass-card p-6">
           <label className="text-sm text-muted-foreground mb-1 block">
-            Fichier {type === "audio" ? "audio" : type === "video" ? "vidéo" : "image"}
+            Fichier {type === "audio" ? "audio" : type === "video" ? "vidéo" : "image"} <span className="text-primary font-bold">(Max 50Mo)</span>
           </label>
           <input
             type="file"
             accept={type === "audio" ? "audio/*" : type === "video" ? "video/*" : "image/*"}
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium"
+            onChange={(e) => handleFileChange(e, setFile)}
+            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium cursor-pointer"
           />
         </div>
       )}
 
-      <div>
-        <label className="text-sm text-muted-foreground mb-1 block">Miniature (optionnel)</label>
+      <div className="glass-card p-6">
+        <label className="text-sm text-muted-foreground mb-1 block">Miniature <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setThumbnail(e.target.files?.[0] || null)}
-          className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium"
+          onChange={(e) => handleFileChange(e, setThumbnail)}
+          className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium cursor-pointer"
         />
       </div>
 
       {loading && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Chargement des fichiers...</span>
+        <div className="space-y-3 bg-primary/5 p-4 rounded-xl border border-primary/20 shadow-inner">
+          <div className="flex justify-between text-sm font-semibold text-primary">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              Transfert en cours...
+            </span>
             <span>{progress}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-3 bg-muted" />
+          <p className="text-[10px] text-muted-foreground text-center uppercase tracking-tighter opacity-70">Veuillez ne pas quitter cette page</p>
         </div>
       )}
 
