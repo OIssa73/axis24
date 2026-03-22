@@ -6,10 +6,6 @@ import { useLanguage } from "@/context/LanguageContext";
 const languages = [
   { code: "fr", name: "Français", flag: "🇫🇷" },
   { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "zh", name: "中文", flag: "🇨🇳" },
-  { code: "ar", name: "العربية", flag: "🇸🇦" },
-  { code: "es", name: "Español", flag: "🇪🇸" },
-  { code: "ru", name: "Русский", flag: "🇷🇺" },
 ] as const;
 
 const LanguageSwitcher = () => {

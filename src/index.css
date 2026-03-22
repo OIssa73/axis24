@@ -18,8 +18,8 @@
     --primary: 0 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 75% 55%;
-    --secondary-foreground: 220 20% 6%;
+    --secondary: 0 85% 55%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 220 15% 15%;
     --muted-foreground: 220 10% 55%;
@@ -46,9 +46,9 @@
     --sidebar-ring: 0 85% 55%;
 
     /* Custom tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(0 85% 55% / 0.15), hsl(40 75% 55% / 0.1));
+    --gradient-hero: linear-gradient(135deg, hsl(0 85% 55% / 0.15), hsl(0 85% 55% / 0.1));
     --gradient-primary: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 42%));
-    --gradient-gold: linear-gradient(135deg, hsl(40, 75%, 55%), hsl(30, 80%, 45%));
+    --gradient-gold: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 40%));
     --shadow-glow: 0 0 40px hsl(0 85% 55% / 0.2);
     --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.4);
   }
