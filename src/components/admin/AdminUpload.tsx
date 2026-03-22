@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface Category {
   id: string;
@@ -19,6 +20,7 @@ const AdminUpload = () => {
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
@@ -32,15 +34,29 @@ const AdminUpload = () => {
   }, []);
 
   const uploadFile = async (file: File, path: string) => {
-    const { data, error } = await supabase.storage.from("media").upload(path, file);
-    if (error) throw error;
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(data.path);
-    return urlData.publicUrl;
+    // Note: Standard Supabase upload doesn't provide progress easily without TUS.
+    // For now, we simulate progress for UX while the file uploads in background.
+    const interval = setInterval(() => {
+      setProgress((prev) => (prev < 90 ? prev + 10 : prev));
+    }, 500);
+
+    try {
+      const { data, error } = await supabase.storage.from("media").upload(path, file);
+      clearInterval(interval);
+      if (error) throw error;
+      setProgress(100);
+      const { data: urlData } = supabase.storage.from("media").getPublicUrl(data.path);
+      return urlData.publicUrl;
+    } catch (err) {
+      clearInterval(interval);
+      throw err;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setProgress(5);
 
     try {
       let fileUrl = "";
@@ -81,8 +97,14 @@ const AdminUpload = () => {
       setTags("");
       setFile(null);
       setThumbnail(null);
+      setProgress(0);
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      setProgress(0);
+      let errorMsg = err.message;
+      if (errorMsg.includes("exceeded the maximum size")) {
+        errorMsg = "Le fichier est trop volumineux (limite par défaut de 50Mo sur Supabase). Suivez les instructions pour augmenter la limite dans votre Dashboard Supabase.";
+      }
+      toast({ title: "Erreur d'upload", description: errorMsg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -196,6 +218,16 @@ const AdminUpload = () => {
           className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium"
         />
       </div>
+
+      {loading && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Chargement des fichiers...</span>
+            <span>{progress}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+      )}
 
       <button
         type="submit"
