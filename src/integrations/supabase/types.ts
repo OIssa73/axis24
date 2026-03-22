@@ -124,6 +124,27 @@ export type Database = {
         }
         Relationships: []
       }
+      journalists: {
+        Row: {
+          id: string
+          name: string
+          image_url: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          image_url: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          image_url?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -3,7 +3,7 @@ import NewsTicker from "@/components/NewsTicker";
 import HeroSection from "@/components/HeroSection";
 import ExternalNewsWidget from "@/components/ExternalNewsWidget";
 import NewsSection from "@/components/NewsSection";
-import AdsWidget from "@/components/AdsWidget";
+import JournalistsSection from "@/components/JournalistsSection";
 import TVSection from "@/components/TVSection";
 import RadioSection from "@/components/RadioSection";
 import Footer from "@/components/Footer";
@@ -17,11 +17,14 @@ const Index = () => {
       </div>
       <HeroSection />
       
-      {/* Social-bar news ticker logic or external high-impact news */}
+      {/* Dynamic international/local news */}
       <ExternalNewsWidget />
       
       <NewsSection />
-      <AdsWidget />
+      
+      {/* Meet the team section */}
+      <JournalistsSection />
+      
       <TVSection />
       <RadioSection />
       <Footer />
