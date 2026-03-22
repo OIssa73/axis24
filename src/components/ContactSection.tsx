@@ -5,10 +5,24 @@ import { useState } from "react";
 const ContactSection = () => {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    
+    const formspreeUrl = "https://formspree.io/f/mdawvwdb";
+
+    const formData = new FormData(e.currentTarget);
+    try {
+      await fetch(formspreeUrl, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      setSubmitted(true);
+      (e.target as HTMLFormElement).reset();
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (error) {
+      console.error("Erreur d'envoi", error);
+    }
   };
 
   return (
@@ -67,6 +81,7 @@ const ContactSection = () => {
                 <label className="text-sm text-muted-foreground mb-1 block">Nom complet</label>
                 <input
                   type="text"
+                  name="nom"
                   required
                   className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="Votre nom"
@@ -76,6 +91,7 @@ const ContactSection = () => {
                 <label className="text-sm text-muted-foreground mb-1 block">Email</label>
                 <input
                   type="email"
+                  name="email"
                   required
                   className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="votre@email.com"
@@ -84,7 +100,7 @@ const ContactSection = () => {
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Objet</label>
-              <select className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+              <select name="objet" className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
                 <option>Partenariat</option>
                 <option>Publicité</option>
                 <option>Presse</option>
@@ -94,6 +110,7 @@ const ContactSection = () => {
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Message</label>
               <textarea
+                name="message"
                 required
                 rows={4}
                 className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
