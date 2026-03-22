@@ -48,9 +48,16 @@ const RadioSection = () => {
     }
   };
 
+  const groupedPodcasts = podcasts.reduce((acc, pod) => {
+    const catName = pod.categories?.name || "Général";
+    if (!acc[catName]) acc[catName] = [];
+    acc[catName].push(pod);
+    return acc;
+  }, {} as Record<string, PodcastContent[]>);
+
   return (
     <section id="radio" className="py-24 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-0 right-0 w-[500px) h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -64,7 +71,8 @@ const RadioSection = () => {
           <h2 className="section-heading text-foreground">RADIO AXIS<span className="text-secondary">24</span></h2>
         </motion.div>
 
-        <div className="glass-card p-6 md:p-8 max-w-2xl mx-auto mb-16 border-primary/20">
+        {/* Global Player Principal */}
+        <div className="glass-card p-6 md:p-8 max-w-2xl mx-auto mb-20 border-primary/20">
           <div className="flex items-center gap-6">
             <button
               onClick={() => setIsPlaying(!isPlaying)}
@@ -105,64 +113,72 @@ const RadioSection = () => {
           </div>
         </div>
 
-        <div>
-          <h3 className="font-display text-2xl text-foreground tracking-wide mb-6 flex items-center gap-2">
-            <Headphones size={22} className="text-primary" />
-            Dernières Émissions
-          </h3>
-          {loading ? (
-            <p className="text-muted-foreground text-center">Chargement...</p>
-          ) : podcasts.length === 0 ? (
-            <p className="text-muted-foreground text-center">Aucun contenu disponible pour le moment.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
-              {podcasts.map((pod, i) => (
-                <motion.div
-                  key={pod.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`glass-card p-5 flex items-center gap-4 group transition-all duration-300 ${
-                    currentAudio?.id === pod.id ? "border-primary/50 bg-primary/5" : "hover:border-primary/30"
-                  }`}
-                  onClick={() => handlePlayPodcast(pod)}
-                >
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handlePlayPodcast(pod); }}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                      currentAudio?.id === pod.id && isPlaying 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-muted text-foreground group-hover:bg-primary group-hover:text-primary-foreground"
+        {/* Categories Groups */}
+        <div className="space-y-24">
+          {Object.entries(groupedPodcasts).map(([categoryName, catPods]) => (
+            <div key={categoryName} className="space-y-8">
+              <div className="flex items-center gap-4">
+                <h3 className="font-display text-2xl text-foreground tracking-wide uppercase px-4 border-l-4 border-secondary">
+                  {categoryName}
+                </h3>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {catPods.map((pod, i) => (
+                  <motion.div
+                    key={pod.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`glass-card p-5 group transition-all duration-300 cursor-pointer overflow-hidden relative ${
+                      currentAudio?.id === pod.id ? "border-primary/50 bg-primary/5" : "hover:border-primary/30"
                     }`}
+                    onClick={() => handlePlayPodcast(pod)}
                   >
-                    {currentAudio?.id === pod.id && isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      {pod.categories?.name && (
-                        <span className="text-[10px] text-primary font-bold uppercase tracking-tighter">
-                          {pod.categories.name}
-                        </span>
+                    <div className="flex items-center gap-4 relative z-10">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 relative flex items-center justify-center bg-muted">
+                        {pod.thumbnail_url ? (
+                          <img src={pod.thumbnail_url} alt={pod.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <Headphones size={24} className="text-muted-foreground/40" />
+                        )}
+                        <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${currentAudio?.id === pod.id && isPlaying ? "bg-primary/40 opacity-100" : "bg-black/20 opacity-0 group-hover:opacity-100"}`}>
+                          {currentAudio?.id === pod.id && isPlaying ? <Pause size={20} className="text-white" /> : <Play size={20} className="text-white fill-current ml-0.5" />}
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`font-semibold truncate mb-1 ${currentAudio?.id === pod.id ? "text-primary" : "text-foreground group-hover:text-primary transition-colors"}`}>
+                          {pod.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
+                          <span className="flex items-center gap-1">
+                            <Clock size={10} /> {pod.duration || "---"}
+                          </span>
+                          <span>•</span>
+                          <span>{new Date(pod.created_at).toLocaleDateString("fr-FR")}</span>
+                        </div>
+                      </div>
+
+                      {pod.file_url && (
+                        <a 
+                          href={pod.file_url} 
+                          download 
+                          onClick={(e) => e.stopPropagation()} 
+                          className="p-2 hover:bg-muted rounded-full transition-colors shrink-0"
+                          title="Télécharger"
+                        >
+                          <Download size={16} className="text-muted-foreground hover:text-foreground" />
+                        </a>
                       )}
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <Clock size={10} /> {pod.duration || "---"}
-                      </span>
                     </div>
-                    <p className={`font-semibold truncate ${currentAudio?.id === pod.id ? "text-primary" : "text-foreground"}`}>
-                      {pod.title}
-                    </p>
-                    <p className="text-muted-foreground text-sm truncate">{pod.description || "Audio"}</p>
-                  </div>
-                  {pod.file_url && (
-                    <a href={pod.file_url} download onClick={(e) => e.stopPropagation()} className="p-2 hover:bg-muted rounded-full transition-colors">
-                      <Download size={16} className="text-muted-foreground hover:text-foreground cursor-pointer shrink-0" />
-                    </a>
-                  )}
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
     </section>

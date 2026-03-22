@@ -62,9 +62,12 @@ const NewsSection = () => {
     );
   }
 
-  const featured = articles[0];
-  const rest = articles.slice(1);
-  const getTag = (article: Article) => article.categories?.name || article.tags?.[0] || "Actualité";
+  const groupedArticles = articles.reduce((acc, article) => {
+    const catName = article.categories?.name || "Général";
+    if (!acc[catName]) acc[catName] = [];
+    acc[catName].push(article);
+    return acc;
+  }, {} as Record<string, Article[]>);
 
   return (
     <section id="actualites" className="py-24 relative">
@@ -80,55 +83,65 @@ const NewsSection = () => {
           <h2 className="section-heading text-foreground">ACTUALITÉS</h2>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          <motion.article
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-6 md:p-8 flex flex-col justify-between group cursor-pointer hover:border-primary/30 transition-colors"
-          >
-            <div>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${categoryColors[getTag(featured)] || "bg-primary/20 text-primary"}`}>
-                {getTag(featured)}
-              </span>
-              <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-wide mt-4 mb-3">
-                {featured.title}
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">{featured.description}</p>
-            </div>
-            <div className="flex items-center justify-between mt-6">
-              <span className="text-muted-foreground text-sm flex items-center gap-1.5">
-                <Calendar size={14} /> {new Date(featured.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-              </span>
-              <span className="text-primary flex items-center gap-1 text-sm font-medium group-hover:gap-2 transition-all">
-                Lire la suite <ArrowRight size={14} />
-              </span>
-            </div>
-          </motion.article>
+        <div className="space-y-20">
+          {Object.entries(groupedArticles).map(([categoryName, catArticles], groupIdx) => (
+            <div key={categoryName} className="space-y-8">
+              <div className="flex items-center gap-4 mb-8">
+                <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-wider uppercase">
+                  {categoryName}
+                </h3>
+                <div className="h-[2px] flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
+              </div>
 
-          <div className="flex flex-col gap-4">
-            {rest.map((article, i) => (
-              <motion.article
-                key={article.id}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card p-5 group cursor-pointer hover:border-primary/30 transition-colors"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${categoryColors[getTag(article)] || "bg-primary/20 text-primary"}`}>
-                      {getTag(article)}
-                    </span>
-                    <h4 className="font-semibold text-foreground mt-2 line-clamp-2">{article.title}</h4>
-                    <p className="text-muted-foreground text-sm mt-1 line-clamp-1">{article.description}</p>
-                  </div>
-                  <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors mt-2 shrink-0" />
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Feature the first article in the category group if it exists */}
+                {catArticles.length > 0 && (
+                  <motion.article
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="glass-card p-6 md:p-8 flex flex-col justify-between group cursor-pointer hover:border-primary/30 transition-colors"
+                  >
+                    <div>
+                      <h3 className="font-display text-2xl text-foreground tracking-wide mb-3">
+                        {catArticles[0].title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed line-clamp-3">{catArticles[0].description}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-6">
+                      <span className="text-muted-foreground text-sm flex items-center gap-1.5">
+                        <Calendar size={14} /> {new Date(catArticles[0].created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      </span>
+                      <span className="text-primary flex items-center gap-1 text-sm font-medium group-hover:gap-2 transition-all">
+                        Lire la suite <ArrowRight size={14} />
+                      </span>
+                    </div>
+                  </motion.article>
+                )}
+
+                <div className="flex flex-col gap-4">
+                  {catArticles.slice(1).map((article, i) => (
+                    <motion.article
+                      key={article.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      className="glass-card p-5 group cursor-pointer hover:border-primary/30 transition-colors"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground mt-2 line-clamp-2">{article.title}</h4>
+                          <p className="text-muted-foreground text-sm mt-1 line-clamp-1">{article.description}</p>
+                        </div>
+                        <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors mt-2 shrink-0" />
+                      </div>
+                    </motion.article>
+                  ))}
                 </div>
-              </motion.article>
-            ))}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
