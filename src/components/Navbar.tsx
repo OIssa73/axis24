@@ -11,10 +11,10 @@ const Navbar = () => {
 
   const navItems = [
     { label: t("accueil"), href: "/" },
-    { label: t("radio"), href: "/#radio", icon: Radio },
-    { label: t("television"), href: "/#television", icon: Tv },
-    { label: t("actualites"), href: "/#news", icon: Newspaper },
-    { label: t("images"), href: "/#images", icon: Images },
+    { label: t("radio"), href: "/radio", icon: Radio },
+    { label: t("television"), href: "/television", icon: Tv },
+    { label: t("actualites"), href: "/actualites", icon: Newspaper },
+    { label: t("images"), href: "/infos-en-images", icon: Images },
     { label: t("contact"), href: "/contact", icon: Phone },
   ];
 
@@ -34,12 +34,12 @@ const Navbar = () => {
         <ul className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <li key={item.label}>
-              <a
-                href={item.href}
+              <Link
+                to={item.href}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 font-medium uppercase tracking-wider"
               >
                 {item.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -49,7 +49,7 @@ const Navbar = () => {
           <Link to="/admin" className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground hover:text-primary transition-all ml-2">
             <LayoutDashboard size={14} /> Admin
           </Link>
-          <Link to="/#radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold">
+          <Link to="/radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold">
             <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
             {t("direct")}
           </Link>
@@ -79,13 +79,13 @@ const Navbar = () => {
             <ul className="flex flex-col gap-1 p-4">
               {navItems.map((item) => (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
+                  <Link
+                    to={item.href}
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-2 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors font-medium text-sm"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

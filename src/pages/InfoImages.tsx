@@ -18,11 +18,11 @@ interface ImageContent {
 
 const categoryColors: Record<string, string> = {
   Politique: "bg-primary/20 text-primary",
-  Sport: "bg-green-500/20 text-green-400",
-  Technologie: "bg-blue-500/20 text-blue-400",
-  Culture: "bg-yellow-500/20 text-yellow-400",
-  Économie: "bg-orange-500/20 text-orange-400",
-  Santé: "bg-pink-500/20 text-pink-400",
+  Sport: "bg-primary/20 text-primary",
+  Technologie: "bg-primary/20 text-primary",
+  Culture: "bg-primary/20 text-primary",
+  Économie: "bg-primary/20 text-primary",
+  Santé: "bg-primary/20 text-primary",
 };
 
 const InfoImages = () => {
