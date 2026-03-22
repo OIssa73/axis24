@@ -69,22 +69,28 @@ const TVSection = () => {
               >
                 <div className="aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
                   {playingId === replay.id ? (
-                    <div className="relative w-full h-full group/player">
+                    <div className="relative w-full h-full group/player overflow-hidden">
                       <video 
                         src={replay.file_url || ""} 
                         controls 
                         autoPlay 
                         className="w-full h-full object-contain bg-black"
                       />
+                      {/* Play/Pause Overlay indicator (simulated for visual feedback) */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover/player:opacity-100 transition-opacity">
+                        <div className="w-12 h-12 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                          <Play size={24} className="text-white opacity-80" />
+                        </div>
+                      </div>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           setPlayingId(null);
                         }}
-                        className="absolute top-2 right-2 p-1 bg-black/60 hover:bg-black/90 text-white rounded-full opacity-0 group-hover/player:opacity-100 transition-opacity z-20"
+                        className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-primary hover:text-primary-foreground text-foreground rounded-full transition-all z-20 shadow-lg border border-border/50"
                         title="Fermer la vidéo"
                       >
-                        <X size={20} />
+                        <X size={16} />
                       </button>
                     </div>
                   ) : (
