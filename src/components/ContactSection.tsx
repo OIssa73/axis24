@@ -56,7 +56,7 @@ const ContactSection = () => {
               {[
                 { icon: MapPin, text: "Ngaoundéré, Cameroun" },
                 { icon: Phone, text: "+237 690 164 060" },
-                { icon: Mail, text: "AXIS24.Media@gmail.com" },
+                { icon: Mail, text: "axis24media.groupe@gmail.com" },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3 text-muted-foreground">
                   <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
