@@ -16,8 +16,8 @@ interface VideoContent {
 
 const TVSection = () => {
   const [replays, setReplays] = useState<VideoContent[]>([]);
-  const [liveContent, setLiveContent] = useState<VideoContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -28,9 +28,7 @@ const TVSection = () => {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        const live = data.find((d) => d.is_live);
-        if (live) setLiveContent(live);
-        setReplays(data.filter((d) => !d.is_live));
+        setReplays(data);
       }
       setLoading(false);
     };
@@ -52,44 +50,14 @@ const TVSection = () => {
           </h2>
         </motion.div>
 
-        {/* Live TV Player */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card overflow-hidden max-w-4xl mx-auto mb-16"
-        >
-          <div className="relative aspect-video bg-muted flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
-            <div className="text-center z-10">
-              <button className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center text-primary-foreground hover:scale-105 transition-transform mb-4 mx-auto">
-                <Play size={36} className="ml-1" />
-              </button>
-              <p className="text-foreground font-display text-xl tracking-wider">DIRECT TV</p>
-            </div>
-            <div className="absolute top-4 left-4 flex items-center gap-2 bg-primary/90 px-3 py-1 rounded text-primary-foreground text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-              LIVE
-            </div>
-          </div>
-          <div className="p-4">
-            <h3 className="font-display text-lg text-foreground tracking-wide">
-              {liveContent?.title || "En attente de diffusion"}
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              {liveContent?.description || "Aucun programme en direct actuellement"}
-            </p>
-          </div>
-        </motion.div>
-
         {/* Replays */}
-        <h3 className="font-display text-2xl text-foreground tracking-wide mb-6">Replays</h3>
+        <h3 className="font-display text-2xl text-foreground tracking-wide mb-6">Contenus Vidéo</h3>
         {loading ? (
           <p className="text-muted-foreground text-center">Chargement...</p>
         ) : replays.length === 0 ? (
-          <p className="text-muted-foreground text-center">Aucun replay disponible pour le moment.</p>
+          <p className="text-muted-foreground text-center">Aucun contenu disponible pour le moment.</p>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {replays.map((replay, i) => (
               <motion.div
                 key={replay.id}
@@ -97,26 +65,41 @@ const TVSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="glass-card overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors"
+                className="glass-card overflow-hidden group hover:border-primary/30 transition-colors"
               >
                 <div className="aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
-                  {replay.thumbnail_url ? (
-                    <img src={replay.thumbnail_url} alt={replay.title} className="w-full h-full object-cover" loading="lazy" />
+                  {playingId === replay.id ? (
+                    <video 
+                      src={replay.file_url || ""} 
+                      controls 
+                      autoPlay 
+                      className="w-full h-full object-contain bg-black"
+                    />
                   ) : (
-                    <Play size={36} className="text-muted-foreground" />
+                    <>
+                      {replay.thumbnail_url ? (
+                        <img src={replay.thumbnail_url} alt={replay.title} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <Play size={36} className="text-muted-foreground" />
+                      )}
+                      <div 
+                        className="absolute inset-0 bg-background/0 group-hover:bg-background/50 transition-colors flex items-center justify-center cursor-pointer"
+                        onClick={() => setPlayingId(replay.id)}
+                      >
+                        <Play size={48} className="text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                      </div>
+                    </>
                   )}
-                  <div className="absolute inset-0 bg-background/0 group-hover:bg-background/50 transition-colors flex items-center justify-center">
-                    <Play size={36} className="text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold text-foreground text-sm">{replay.title}</h4>
-                  <div className="flex items-center gap-3 text-muted-foreground text-xs mt-1">
+                  <h4 className="font-semibold text-foreground text-sm line-clamp-1">{replay.title}</h4>
+                  <p className="text-muted-foreground text-xs mt-1 line-clamp-2">{replay.description}</p>
+                  <div className="flex items-center gap-3 text-muted-foreground text-[10px] mt-3 uppercase tracking-tighter">
                     <span className="flex items-center gap-1">
-                      <Clock size={12} /> {new Date(replay.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      <Clock size={10} /> {new Date(replay.created_at).toLocaleDateString("fr-FR")}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Eye size={12} /> {replay.views_count || 0}
+                      <Eye size={10} /> {replay.views_count || 0} vues
                     </span>
                   </div>
                 </div>
