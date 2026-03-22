@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Calendar, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar, Newspaper, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
@@ -8,25 +8,17 @@ interface Article {
   id: string;
   title: string;
   description: string | null;
-  tags: string[] | null;
-  created_at: string;
   thumbnail_url: string | null;
+  created_at: string;
+  content_type: string;
+  category_id: string | null;
   categories?: { name: string } | null;
 }
-
-const categoryColors: Record<string, string> = {
-  Politique: "bg-primary/20 text-primary",
-  Média: "bg-secondary/20 text-secondary",
-  Sport: "bg-green-500/20 text-green-400",
-  Technologie: "bg-blue-500/20 text-blue-400",
-  Culture: "bg-yellow-500/20 text-yellow-400",
-  Économie: "bg-orange-500/20 text-orange-400",
-  Santé: "bg-pink-500/20 text-pink-400",
-};
 
 const NewsSection = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("Tous");
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -35,118 +27,135 @@ const NewsSection = () => {
         .select("*, categories(name)")
         .eq("type", "article")
         .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      if (data) setArticles(data as any);
+        .order("created_at", { ascending: false });
+      if (data) {
+        setArticles(data as any);
+      }
       setLoading(false);
     };
     fetchArticles();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="py-24 text-center text-muted-foreground uppercase tracking-widest animate-pulse">
-        Chargement des actualités...
-      </div>
-    );
-  }
+  const categories = ["Tous", ...Array.from(new Set(articles.map(a => a.categories?.name || "Général")))];
 
-  if (articles.length === 0) {
-    return (
-      <section id="actualites" className="py-24">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-2">Restez informé</p>
-          <h2 className="section-heading text-foreground">ACTUALITÉS</h2>
-          <p className="text-muted-foreground mt-8">Aucune actualité pour le moment.</p>
-        </div>
-      </section>
-    );
-  }
-
-  const groupedArticles = articles.reduce((acc, article) => {
-    const catName = article.categories?.name || "Général";
-    if (!acc[catName]) acc[catName] = [];
-    acc[catName].push(article);
-    return acc;
-  }, {} as Record<string, Article[]>);
+  const filteredArticles = activeTab === "Tous" 
+    ? articles 
+    : articles.filter(a => (a.categories?.name || "Général") === activeTab);
 
   return (
-    <section id="actualites" className="py-24 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+    <section id="news" className="py-24 bg-background relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
+           initial={{ opacity: 0, y: 20 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="text-center mb-12"
         >
-          <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-2">Restez informé</p>
-          <h2 className="section-heading text-foreground">ACTUALITÉS</h2>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
+            <Newspaper size={12} /> Actualités
+          </div>
+          <h2 className="section-heading text-foreground">LE MAG AXIS<span className="text-primary">24</span></h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">Toute l'information décryptée pour vous.</p>
         </motion.div>
 
-        <div className="space-y-20">
-          {Object.entries(groupedArticles).map(([categoryName, catArticles]) => (
-            <div key={categoryName} className="space-y-8">
-              <div className="flex items-center gap-4 mb-8">
-                <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-wider uppercase">
-                  {categoryName}
-                </h3>
-                <div className="h-[2px] flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
-              </div>
+        {/* Categories Tabs */}
+        {categories.length > 1 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveTab(cat)}
+                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                  activeTab === cat 
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" 
+                  : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
 
-              <div className="grid lg:grid-cols-2 gap-6">
-                {/* Feature the first article in the category group if it exists */}
-                {catArticles.length > 0 && (
-                  <Link to={`/content/${catArticles[0].id}`}>
-                    <motion.article
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      className="glass-card p-6 md:p-8 h-full flex flex-col justify-between group cursor-pointer hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/10"
-                    >
-                      <div>
-                        <h3 className="font-display text-2xl text-foreground tracking-wide mb-3 group-hover:text-primary transition-colors">
-                          {catArticles[0].title}
-                        </h3>
-                        <p className="text-muted-foreground leading-relaxed line-clamp-3">{catArticles[0].description}</p>
+        {loading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-[4/5] rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : filteredArticles.length === 0 ? (
+          <p className="text-muted-foreground text-center py-20">Aucun article dans cette catégorie.</p>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {filteredArticles.slice(0, 6).map((article, i) => (
+                <motion.article
+                  key={article.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group flex flex-col bg-muted/20 rounded-3xl overflow-hidden border border-border/50 hover:border-primary/30 hover:bg-background transition-all"
+                >
+                  <Link to={`/content/${article.id}`} className="aspect-[16/10] overflow-hidden relative">
+                    {article.thumbnail_url ? (
+                      <img 
+                        src={article.thumbnail_url} 
+                        alt={article.title} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                        <Newspaper size={40} className="text-primary/20" />
                       </div>
-                      <div className="flex items-center justify-between mt-6">
-                        <span className="text-muted-foreground text-sm flex items-center gap-1.5 font-medium">
-                          <Calendar size={14} /> {new Date(catArticles[0].created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
-                        </span>
-                        <span className="text-primary flex items-center gap-1 text-sm font-bold group-hover:gap-2 transition-all">
-                          Lire la suite <ArrowRight size={14} />
-                        </span>
-                      </div>
-                    </motion.article>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-primary/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                        {article.categories?.name || "Infos"}
+                      </span>
+                    </div>
                   </Link>
-                )}
-
-                <div className="flex flex-col gap-4">
-                  {catArticles.slice(1).map((article, i) => (
-                    <Link key={article.id} to={`/content/${article.id}`}>
-                      <motion.article
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 }}
-                        className="glass-card p-5 group cursor-pointer hover:border-primary/50 transition-all"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-foreground mt-1 line-clamp-2 group-hover:text-primary transition-colors">{article.title}</h4>
-                            <p className="text-muted-foreground text-xs mt-1 line-clamp-1 italic">{article.description}</p>
-                          </div>
-                          <ArrowRight size={18} className="text-muted-foreground group-hover:text-primary transition-all mt-2 shrink-0 group-hover:translate-x-1" />
-                        </div>
-                      </motion.article>
+                  
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-4 font-bold uppercase tracking-widest">
+                      <Calendar size={12} className="text-primary" />
+                      {new Date(article.created_at).toLocaleDateString("fr-FR")}
+                    </div>
+                    
+                    <h3 className="font-display text-xl leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3">
+                      {article.title}
+                    </h3>
+                    
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-6 flex-1">
+                      {article.description}
+                    </p>
+                    
+                    <Link 
+                      to={`/content/${article.id}`} 
+                      className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary group-hover:gap-3 transition-all"
+                    >
+                      Lire la suite <ChevronRight size={14} />
                     </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                  </div>
+                </motion.article>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        )}
+        
+        {filteredArticles.length > 6 && (
+           <div className="mt-16 text-center">
+             <Link to="/news" className="btn-primary-glow px-8 py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em]">
+               Voir tous les articles
+             </Link>
+           </div>
+        )}
       </div>
     </section>
   );

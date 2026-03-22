@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Play, Clock, Eye, X, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, Clock, Eye, X, Info, MonitorPlay } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
@@ -20,6 +20,7 @@ const TVSection = () => {
   const [replays, setReplays] = useState<VideoContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("Tous");
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -37,117 +38,133 @@ const TVSection = () => {
     fetchVideos();
   }, []);
 
-  const groupedReplays = replays.reduce((acc, replay) => {
-    const catName = replay.categories?.name || "Général";
-    if (!acc[catName]) acc[catName] = [];
-    acc[catName].push(replay);
-    return acc;
-  }, {} as Record<string, VideoContent[]>);
+  const categories = ["Tous", ...Array.from(new Set(replays.map(r => r.categories?.name || "Général")))];
+
+  const filteredVideos = activeTab === "Tous" 
+    ? replays 
+    : replays.filter(r => (r.categories?.name || "Général") === activeTab);
 
   return (
-    <section id="television" className="py-24">
+    <section id="television" className="py-24 bg-muted/10">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
-          <p className="text-secondary font-semibold text-sm uppercase tracking-widest mb-2">Streaming vidéo</p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest mb-4">
+            <MonitorPlay size={12} /> Streaming & Replay
+          </div>
           <h2 className="section-heading text-foreground">
             TÉLÉVISION AXIS<span className="text-primary">24</span>
           </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">Retrouvez toutes nos émissions et reportages en vidéo.</p>
         </motion.div>
 
-        {loading ? (
-          <p className="text-muted-foreground text-center">Chargement...</p>
-        ) : replays.length === 0 ? (
-          <p className="text-muted-foreground text-center">Aucun contenu disponible pour le moment.</p>
-        ) : (
-          <div className="space-y-24">
-            {Object.entries(groupedReplays).map(([categoryName, catVideos]) => (
-              <div key={categoryName} className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <h3 className="font-display text-2xl text-foreground tracking-wide uppercase px-4 border-l-4 border-primary">
-                    {categoryName}
-                  </h3>
-                  <div className="h-px flex-1 bg-border/50" />
-                </div>
-
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {catVideos.map((replay, i) => (
-                    <motion.div
-                      key={replay.id}
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                      className="glass-card overflow-hidden group hover:border-primary/30 transition-colors"
-                    >
-                      <div className="aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
-                        {playingId === replay.id ? (
-                          <div className="relative w-full h-full group/player overflow-hidden">
-                            <video 
-                              src={replay.file_url || ""} 
-                              controls 
-                              autoPlay 
-                              className="w-full h-full object-contain bg-black"
-                            />
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPlayingId(null);
-                              }}
-                              className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-primary hover:text-primary-foreground text-foreground rounded-full transition-all z-20 shadow-lg border border-border/50"
-                              title="Fermer la vidéo"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            {replay.thumbnail_url ? (
-                              <img src={replay.thumbnail_url} alt={replay.title} className="w-full h-full object-cover" loading="lazy" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                                <Play size={48} className="text-muted-foreground/30" />
-                              </div>
-                            )}
-                            <div 
-                              className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center cursor-pointer"
-                              onClick={() => setPlayingId(replay.id)}
-                            >
-                              <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
-                                <Play size={24} className="text-white fill-current ml-1" />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{replay.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{replay.description}</p>
-                        
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-                          <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                            <span className="flex items-center gap-1.5">
-                              <Eye size={12} /> {replay.views_count || 0}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Clock size={12} /> {new Date(replay.created_at).toLocaleDateString("fr-FR")}
-                            </span>
-                          </div>
-                          <Link to={`/content/${replay.id}`} className="text-primary hover:text-primary/80 transition-colors">
-                            <Info size={16} />
-                          </Link>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+        {/* Categories Tabs */}
+        {categories.length > 1 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveTab(cat)}
+                className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                  activeTab === cat 
+                  ? "bg-secondary text-white shadow-lg shadow-secondary/20 scale-105" 
+                  : "bg-background text-muted-foreground hover:bg-secondary/10 hover:text-secondary border border-border/50"
+                }`}
+              >
+                {cat}
+              </button>
             ))}
           </div>
+        )}
+
+        {loading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-video rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : filteredVideos.length === 0 ? (
+          <p className="text-muted-foreground text-center py-20">Aucune vidéo dans cette catégorie.</p>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredVideos.map((replay, i) => (
+                <motion.div
+                  key={replay.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="glass-card overflow-hidden group hover:border-secondary/30 transition-all flex flex-col"
+                >
+                  <div className="aspect-video bg-black flex items-center justify-center relative overflow-hidden">
+                    {playingId === replay.id ? (
+                      <div className="relative w-full h-full group/player">
+                        <video 
+                          src={replay.file_url || ""} 
+                          controls 
+                          autoPlay 
+                          className="w-full h-full object-contain"
+                        />
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setPlayingId(null); }}
+                          className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-secondary hover:text-white text-foreground rounded-full transition-all z-20 shadow-lg"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        {replay.thumbnail_url ? (
+                          <img src={replay.thumbnail_url} alt={replay.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/20">
+                            <Play size={48} className="text-muted-foreground/30" />
+                          </div>
+                        )}
+                        <div 
+                          className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all flex items-center justify-center cursor-pointer"
+                          onClick={() => setPlayingId(replay.id)}
+                        >
+                          <div className="w-14 h-14 rounded-full bg-secondary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                            <Play size={24} className="text-white fill-current ml-1" />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-secondary transition-colors text-lg mb-2">{replay.title}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4 flex-1">{replay.description}</p>
+                    
+                    <div className="flex items-center justify-between pt-4 border-t border-border/40">
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                        <span className="flex items-center gap-1.5">
+                          <Eye size={12} className="text-secondary" /> {replay.views_count || 0}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock size={12} className="text-secondary" /> {new Date(replay.created_at).toLocaleDateString("fr-FR")}
+                        </span>
+                      </div>
+                      <Link to={`/content/${replay.id}`} className="p-2 rounded-full hover:bg-secondary/10 text-muted-foreground hover:text-secondary transition-all">
+                        <Info size={18} />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
     </section>
