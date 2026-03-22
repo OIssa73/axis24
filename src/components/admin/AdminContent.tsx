@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Eye, EyeOff } from "lucide-react";
+import { Trash2, Eye, EyeOff, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AdminEditForm from "./AdminEditForm";
 
 interface ContentItem {
   id: string;
@@ -15,6 +16,7 @@ interface ContentItem {
 const AdminContent = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [filterType, setFilterType] = useState("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchContent = async () => {
@@ -33,10 +35,15 @@ const AdminContent = () => {
   };
 
   const deleteContent = async (id: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce contenu ?")) return;
     await supabase.from("content").delete().eq("id", id);
     fetchContent();
     toast({ title: "Contenu supprimé" });
   };
+
+  if (editingId) {
+    return <AdminEditForm contentId={editingId} onCancel={() => setEditingId(null)} onSuccess={() => { setEditingId(null); fetchContent(); }} />;
+  }
 
   return (
     <div>
@@ -85,6 +92,13 @@ const AdminContent = () => {
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => setEditingId(item.id)}
+                  className="p-2 rounded-lg hover:bg-primary/10 transition-colors text-muted-foreground hover:text-primary"
+                  title="Modifier"
+                >
+                  <Edit size={16} />
+                </button>
+                <button
                   onClick={() => togglePublish(item.id, item.is_published)}
                   className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                   title={item.is_published ? "Masquer" : "Publier"}
@@ -106,5 +120,7 @@ const AdminContent = () => {
     </div>
   );
 };
+
+export default AdminContent;
 
 export default AdminContent;

@@ -21,6 +21,7 @@ const AdminUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
+  const [allowDownload, setAllowDownload] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
@@ -100,6 +101,7 @@ const AdminUpload = () => {
         thumbnail_url: thumbnailUrl || null,
         body: body || null,
         tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+        allow_download: allowDownload,
         created_by: user?.id,
       });
 
@@ -112,6 +114,7 @@ const AdminUpload = () => {
       setTags("");
       setFile(null);
       setThumbnail(null);
+      setAllowDownload(true);
       setProgress(0);
     } catch (err: any) {
       setProgress(0);
@@ -219,6 +222,19 @@ const AdminUpload = () => {
           />
         </div>
       )}
+
+      <div className="flex items-center gap-3 p-4 glass-card bg-primary/5 border-primary/20">
+        <input
+          type="checkbox"
+          id="allowDownload"
+          checked={allowDownload}
+          onChange={(e) => setAllowDownload(e.target.checked)}
+          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+        />
+        <label htmlFor="allowDownload" className="text-sm font-medium text-foreground cursor-pointer">
+          Autoriser le téléchargement par les visiteurs
+        </label>
+      </div>
 
       <div className="glass-card p-6">
         <label className="text-sm text-muted-foreground mb-1 block">Miniature <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>

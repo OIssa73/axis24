@@ -12,6 +12,7 @@ import Contact from "./pages/Contact.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminSetup from "./pages/AdminSetup.tsx";
+import ContentDetail from "./pages/ContentDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/actualites" element={<Actualites />} />
           <Route path="/infos-en-images" element={<InfoImages />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/content/:id" element={<ContentDetail />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/setup" element={<AdminSetup />} />
           <Route path="/admin" element={<AdminDashboard />} />

@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Play, Pause, SkipForward, Volume2, Download, Headphones, Clock } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Phone, Mail, MapPin, Play, Pause, Headphones, Clock, Volume2, Download, Eye, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface PodcastContent {
   id: string;
   title: string;
-  description: string | null;
-  file_url: string | null;
-  thumbnail_url: string | null;
-  duration: string | null;
+  description: string;
+  file_url: string;
   created_at: string;
+  duration?: string;
+  views_count?: number;
   categories?: { name: string } | null;
 }
 
@@ -150,29 +151,35 @@ const RadioSection = () => {
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h4 className={`font-semibold truncate mb-1 ${currentAudio?.id === pod.id ? "text-primary" : "text-foreground group-hover:text-primary transition-colors"}`}>
-                          {pod.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
+                        <h4 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">{pod.title}</h4>
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{pod.description}</p>
+                        <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                           <span className="flex items-center gap-1">
-                            <Clock size={10} /> {pod.duration || "---"}
+                            <Eye size={12} /> {pod.views_count || 0}
                           </span>
-                          <span>•</span>
                           <span>{new Date(pod.created_at).toLocaleDateString("fr-FR")}</span>
                         </div>
                       </div>
-
-                      {pod.file_url && (
-                        <a 
-                          href={pod.file_url} 
-                          download 
-                          onClick={(e) => e.stopPropagation()} 
-                          className="p-2 hover:bg-muted rounded-full transition-colors shrink-0"
-                          title="Télécharger"
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handlePlayPodcast(pod); }}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                            currentAudio?.id === pod.id && isPlaying
+                              ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20"
+                              : "bg-muted text-foreground hover:bg-primary/20 hover:text-primary"
+                          }`}
                         >
-                          <Download size={16} className="text-muted-foreground hover:text-foreground" />
-                        </a>
-                      )}
+                          {currentAudio?.id === pod.id && isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                        </button>
+                        <Link 
+                          to={`/content/${pod.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-10 h-10 rounded-full flex items-center justify-center bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                          title="Détails"
+                        >
+                          <Info size={18} />
+                        </Link>
+                      </div>
                     </div>
                   </motion.div>
                 ))}

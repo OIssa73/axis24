@@ -50,6 +50,7 @@ export type Database = {
           id: string
           is_live: boolean | null
           is_published: boolean | null
+          allow_download: boolean | null
           tags: string[] | null
           thumbnail_url: string | null
           title: string
@@ -68,6 +69,7 @@ export type Database = {
           id?: string
           is_live?: boolean | null
           is_published?: boolean | null
+          allow_download?: boolean | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title: string
@@ -86,6 +88,7 @@ export type Database = {
           id?: string
           is_live?: boolean | null
           is_published?: boolean | null
+          allow_download?: boolean | null
           tags?: string[] | null
           thumbnail_url?: string | null
           title?: string

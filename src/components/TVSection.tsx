@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Clock, Eye, X } from "lucide-react";
+import { Play, Clock, Eye, X, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface VideoContent {
   id: string;
@@ -126,13 +127,19 @@ const TVSection = () => {
                       <div className="p-4">
                         <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">{replay.title}</h4>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{replay.description}</p>
-                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border/50 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                          <span className="flex items-center gap-1.5">
-                            <Eye size={12} /> {replay.views_count || 0} vues
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock size={12} /> {new Date(replay.created_at).toLocaleDateString("fr-FR")}
-                          </span>
+                        
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+                          <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                            <span className="flex items-center gap-1.5">
+                              <Eye size={12} /> {replay.views_count || 0}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Clock size={12} /> {new Date(replay.created_at).toLocaleDateString("fr-FR")}
+                            </span>
+                          </div>
+                          <Link to={`/content/${replay.id}`} className="text-primary hover:text-primary/80 transition-colors">
+                            <Info size={16} />
+                          </Link>
                         </div>
                       </div>
                     </motion.div>
