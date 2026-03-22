@@ -145,6 +145,21 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          key: string
+          value: any
+        }
+        Insert: {
+          key: string
+          value: any
+        }
+        Update: {
+          key?: string
+          value?: any
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
