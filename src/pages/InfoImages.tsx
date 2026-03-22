@@ -13,6 +13,7 @@ interface ImageContent {
   thumbnail_url: string | null;
   file_url: string | null;
   created_at: string;
+  categories?: { name: string } | null;
 }
 
 const categoryColors: Record<string, string> = {
@@ -34,24 +35,26 @@ const InfoImages = () => {
     const fetchImages = async () => {
       const { data } = await supabase
         .from("content")
-        .select("*")
+        .select("*, categories(name)")
         .eq("type", "image")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setItems(data);
-        // Extract unique tags for category filters
-        const allTags = new Set<string>();
-        data.forEach((item) => item.tags?.forEach((tag) => allTags.add(tag)));
-        setCategories(["Tout", ...Array.from(allTags)]);
+        setItems(data as any);
+        // Extract unique category names for filters
+        const catNames = new Set<string>();
+        data.forEach((item: any) => {
+          if (item.categories?.name) catNames.add(item.categories.name);
+        });
+        setCategories(["Tout", ...Array.from(catNames)]);
       }
       setLoading(false);
     };
     fetchImages();
   }, []);
 
-  const filtered = active === "Tout" ? items : items.filter((a) => a.tags?.includes(active));
-  const getTag = (item: ImageContent) => item.tags?.[0] || "Info";
+  const filtered = active === "Tout" ? items : items.filter((a) => a.categories?.name === active);
+  const getTag = (item: ImageContent) => item.categories?.name || item.tags?.[0] || "Info";
   const getImage = (item: ImageContent) => item.file_url || item.thumbnail_url || "/placeholder.svg";
 
   return (

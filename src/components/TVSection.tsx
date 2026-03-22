@@ -7,11 +7,12 @@ interface VideoContent {
   id: string;
   title: string;
   description: string | null;
-  thumbnail_url: string | null;
   file_url: string | null;
-  is_live: boolean | null;
-  views_count: number | null;
+  thumbnail_url: string | null;
+  is_live: boolean;
+  views_count: number;
   created_at: string;
+  categories?: { name: string } | null;
 }
 
 const TVSection = () => {
@@ -23,12 +24,12 @@ const TVSection = () => {
     const fetchVideos = async () => {
       const { data } = await supabase
         .from("content")
-        .select("*")
+        .select("*, categories(name)")
         .eq("type", "video")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setReplays(data);
+        setReplays(data as any);
       }
       setLoading(false);
     };
@@ -100,6 +101,14 @@ const TVSection = () => {
                       ) : (
                         <Play size={36} className="text-muted-foreground" />
                       )}
+                      
+                      {/* Category Badge */}
+                      {replay.categories?.name && (
+                        <span className="absolute top-3 left-3 bg-primary/90 text-primary-foreground text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-widest z-10">
+                          {replay.categories.name}
+                        </span>
+                      )}
+
                       <div 
                         className="absolute inset-0 bg-background/0 group-hover:bg-background/50 transition-colors flex items-center justify-center cursor-pointer"
                         onClick={() => setPlayingId(replay.id)}

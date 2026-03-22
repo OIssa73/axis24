@@ -10,6 +10,7 @@ interface Article {
   tags: string[] | null;
   created_at: string;
   thumbnail_url: string | null;
+  categories?: { name: string } | null;
 }
 
 const categoryColors: Record<string, string> = {
@@ -30,12 +31,12 @@ const NewsSection = () => {
     const fetchArticles = async () => {
       const { data } = await supabase
         .from("content")
-        .select("*")
+        .select("*, categories(name)")
         .eq("type", "article")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(4);
-      if (data) setArticles(data);
+      if (data) setArticles(data as any);
       setLoading(false);
     };
     fetchArticles();
@@ -63,7 +64,7 @@ const NewsSection = () => {
 
   const featured = articles[0];
   const rest = articles.slice(1);
-  const getTag = (article: Article) => article.tags?.[0] || "Actualité";
+  const getTag = (article: Article) => article.categories?.name || article.tags?.[0] || "Actualité";
 
   return (
     <section id="actualites" className="py-24 relative">
