@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Journalist {
   id: string;
@@ -11,6 +12,7 @@ interface Journalist {
 
 const JournalistsSection = () => {
   const [journalists, setJournalists] = useState<Journalist[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchJournalists = async () => {
@@ -23,14 +25,14 @@ const JournalistsSection = () => {
   if (journalists.length === 0) return null;
 
   return (
-    <section className="py-20 bg-background overflow-hidden">
+    <section className="py-20 bg-background overflow-hidden" id="journalists">
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
-              <Users size={12} /> L'Équipe
+              <Users size={12} /> {t("equipe")}
             </div>
-            <h2 className="section-heading text-foreground">NOS <span className="text-primary">JOURNALISTES</span></h2>
+            <h2 className="section-heading text-foreground uppercase">{t("journalistes")}</h2>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-muted-foreground/50 italic text-xs">
             Faites défiler pour voir toute l'équipe <ChevronRight size={14} />
@@ -66,7 +68,6 @@ const JournalistsSection = () => {
             ))}
           </div>
           
-          {/* Fades for scroll indication */}
           <div className="absolute left-0 top-0 bottom-8 w-12 bg-gradient-to-r from-background to-transparent pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-8 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" />
         </div>

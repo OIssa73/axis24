@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Globe, ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
 
 const languages = [
   { code: "fr", name: "Français", flag: "🇫🇷" },
@@ -9,11 +10,13 @@ const languages = [
   { code: "ar", name: "العربية", flag: "🇸🇦" },
   { code: "es", name: "Español", flag: "🇪🇸" },
   { code: "ru", name: "Русский", flag: "🇷🇺" },
-];
+] as const;
 
 const LanguageSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState(languages[0]);
+  const { language, setLanguage } = useLanguage();
+  
+  const currentLang = languages.find(l => l.code === language) || languages[0];
 
   return (
     <div className="relative">
@@ -41,12 +44,11 @@ const LanguageSwitcher = () => {
                   <button
                     key={lang.code}
                     onClick={() => {
-                      setCurrentLang(lang);
+                      setLanguage(lang.code);
                       setIsOpen(false);
-                      // In a real app, this would trigger i18n change
                     }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all ${
-                      currentLang.code === lang.code 
+                      language === lang.code 
                       ? "bg-primary/10 text-primary font-bold" 
                       : "hover:bg-muted text-muted-foreground hover:text-foreground"
                     }`}
@@ -55,7 +57,7 @@ const LanguageSwitcher = () => {
                       <span className="text-lg leading-none">{lang.flag}</span>
                       <span className="tracking-tight">{lang.name}</span>
                     </div>
-                    {currentLang.code === lang.code && <Check size={14} />}
+                    {language === lang.code && <Check size={14} />}
                   </button>
                 ))}
               </div>

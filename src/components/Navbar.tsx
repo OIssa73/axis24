@@ -3,16 +3,20 @@ import { Radio, Tv, Newspaper, Phone, Menu, X, Images, LayoutDashboard } from "l
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
-
-const navItems = [
-  { label: "Accueil", href: "/" },
-  { label: "Radio", href: "/#radio", icon: Radio },
-  { label: "Télévision", href: "/#television", icon: Tv },
-  { label: "Actualités", href: "/#news", icon: Newspaper },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
+
+  const navItems = [
+    { label: t("accueil"), href: "/" },
+    { label: t("radio"), href: "/#radio", icon: Radio },
+    { label: t("television"), href: "/#television", icon: Tv },
+    { label: t("actualites"), href: "/#news", icon: Newspaper },
+    { label: t("images"), href: "/#images", icon: Images },
+    { label: t("contact"), href: "/contact", icon: Phone },
+  ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -40,14 +44,14 @@ const Navbar = () => {
           ))}
         </ul>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3 text-foreground">
           <LanguageSwitcher />
           <Link to="/admin" className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground hover:text-primary transition-all ml-2">
             <LayoutDashboard size={14} /> Admin
           </Link>
           <Link to="/#radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold">
             <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-            EN DIRECT
+            {t("direct")}
           </Link>
         </div>
 
@@ -78,22 +82,12 @@ const Navbar = () => {
                   <a
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors font-medium"
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors font-medium text-sm"
                   >
-                    {item.icon && <item.icon size={16} />}
                     {item.label}
                   </a>
                 </li>
               ))}
-              <li className="pt-2 border-t border-border mt-2">
-                <Link
-                  to="/admin"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-primary font-bold uppercase text-xs tracking-widest"
-                >
-                  <LayoutDashboard size={16} /> Administration
-                </Link>
-              </li>
             </ul>
           </motion.div>
         )}

@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { Radio, Tv, Images, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
+  const { t } = useLanguage();
+
   return (
     <section
       id="accueil"
@@ -33,7 +36,7 @@ const HeroSection = () => {
             MEDIA GROUPE
           </p>
           <p className="text-muted-foreground text-lg max-w-lg mx-auto mb-10">
-            Radio & Télévision — L'information en continu, où que vous soyez.
+            {t("hero_subtitle")}
           </p>
         </motion.div>
 
@@ -48,21 +51,21 @@ const HeroSection = () => {
             className="btn-primary-glow flex items-center gap-3 text-lg px-8 py-4"
           >
             <Radio size={20} />
-            Radio en direct
+            {t("radio_live")}
           </Link>
           <Link
             to="/television"
             className="glass-card flex items-center gap-3 text-lg px-8 py-4 text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
           >
             <Tv size={20} />
-            TV en direct
+            {t("tv_live")}
           </Link>
           <Link
             to="/infos-en-images"
             className="glass-card flex items-center gap-3 text-lg px-8 py-4 text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
           >
             <Images size={20} />
-            Infos en images
+            {t("infos_images")}
           </Link>
         </motion.div>
 

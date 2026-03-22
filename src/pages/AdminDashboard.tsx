@@ -16,6 +16,7 @@ const tabs = [
   { id: "upload", label: "Uploader", icon: Upload },
   { id: "categories", label: "Catégories", icon: FolderOpen },
   { id: "journalists", label: "Journalistes", icon: Users },
+  { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
 const AdminDashboard = () => {
@@ -105,11 +106,13 @@ const AdminDashboard = () => {
           </h2>
         </header>
 
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-auto bg-muted/20">
           {activeTab === "stats" && <AdminStats />}
           {activeTab === "content" && <AdminContent />}
           {activeTab === "upload" && <AdminUpload />}
           {activeTab === "categories" && <AdminCategories />}
+          {activeTab === "journalists" && <AdminJournalists />}
+          {activeTab === "settings" && <AdminSettings />}
         </main>
       </div>
     </div>

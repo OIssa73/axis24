@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Newspaper, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Article {
   id: string;
@@ -19,6 +20,7 @@ const NewsSection = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Tous");
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -36,9 +38,9 @@ const NewsSection = () => {
     fetchArticles();
   }, []);
 
-  const categories = ["Tous", ...Array.from(new Set(articles.map(a => a.categories?.name || "Général")))];
+  const categories = [language === "fr" ? "Tous" : "All", ...Array.from(new Set(articles.map(a => a.categories?.name || "Général")))];
 
-  const filteredArticles = activeTab === "Tous" 
+  const filteredArticles = (activeTab === "Tous" || activeTab === "All")
     ? articles 
     : articles.filter(a => (a.categories?.name || "Général") === activeTab);
 
@@ -52,10 +54,10 @@ const NewsSection = () => {
            className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
-            <Newspaper size={12} /> Actualités
+            <Newspaper size={12} /> {t("actualites")}
           </div>
-          <h2 className="section-heading text-foreground">LE MAG AXIS<span className="text-primary">24</span></h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">Toute l'information décryptée pour vous.</p>
+          <h2 className="section-heading text-foreground uppercase">{t("le_mag")}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t("news_desc")}</p>
         </motion.div>
 
         {/* Categories Tabs */}
@@ -125,7 +127,7 @@ const NewsSection = () => {
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center gap-3 text-[10px] text-muted-foreground mb-4 font-bold uppercase tracking-widest">
                       <Calendar size={12} className="text-primary" />
-                      {new Date(article.created_at).toLocaleDateString("fr-FR")}
+                      {new Date(article.created_at).toLocaleDateString(language === "en" ? "en-US" : "fr-FR")}
                     </div>
                     
                     <h3 className="font-display text-xl leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-3">
@@ -140,7 +142,7 @@ const NewsSection = () => {
                       to={`/content/${article.id}`} 
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary group-hover:gap-3 transition-all"
                     >
-                      Lire la suite <ChevronRight size={14} />
+                      {t("read_more")} <ChevronRight size={14} />
                     </Link>
                   </div>
                 </motion.article>
@@ -151,8 +153,8 @@ const NewsSection = () => {
         
         {filteredArticles.length > 6 && (
            <div className="mt-16 text-center">
-             <Link to="/news" className="btn-primary-glow px-8 py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em]">
-               Voir tous les articles
+             <Link to="/actualites" className="btn-primary-glow px-8 py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em]">
+               {t("view_all")}
              </Link>
            </div>
         )}
