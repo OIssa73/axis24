@@ -127,7 +127,7 @@ const AdminJournalists = () => {
 
       await supabase
         .from("site_settings")
-        .upsert({ key: "journalists_bios", value: updatedBios as any });
+        .upsert({ key: "journalists_bios", value: updatedBios as Record<string, unknown> });
 
       toast({ 
         title: editingId ? "Journaliste modifié" : "Journaliste ajouté", 
@@ -170,7 +170,7 @@ const AdminJournalists = () => {
       if (settingsData?.value) {
         const bios = settingsData.value as Record<string, string>;
         delete bios[id];
-        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as any });
+        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as Record<string, unknown> });
       }
 
       toast({ title: "Supprimé", description: "Le journaliste a été retiré de l'équipe." });

@@ -76,7 +76,7 @@ const AdminAds = () => {
     setSaving(true);
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ key: "ads_config", value: config as any });
+      .upsert({ key: "ads_config", value: config as unknown as Record<string, unknown> });
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });

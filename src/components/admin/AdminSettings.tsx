@@ -84,7 +84,7 @@ const AdminSettings = () => {
       
     const { error: err2 } = await supabase
       .from("site_settings")
-      .upsert({ key: "section_titles", value: titles as unknown as Record<string, any> });
+      .upsert({ key: "section_titles", value: titles as unknown as Record<string, unknown> });
 
     if (err1 || err2) {
       toast({ title: "Erreur", description: (err1 || err2)?.message, variant: "destructive" });
