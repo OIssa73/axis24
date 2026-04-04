@@ -37,7 +37,7 @@ const AdminCategories = () => {
     const { error } = await supabase.from("categories").insert({
       name: name.trim(),
       slug: slugify(name.trim()),
-      type,
+      type: (type === "job" || type === "sport") ? "article" : type,
     });
 
     if (error) {
