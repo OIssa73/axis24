@@ -70,7 +70,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return "fr";
   });
 
-  // Détecteur Auto-Traduction Global (Scroll et Asynchrone)
+  // Détecteur Auto-Traduction Global
   React.useEffect(() => {
     if (language === "fr") return;
 
@@ -83,24 +83,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {}
     };
 
-    // On ne garde plus la boucle `setInterval` qui causait un clignotement / rafraîchissement constant.
-    // L'ajout de nouveaux éléments dans le DOM est souvent géré par Google Translate nativement, 
-    // et le Scroll couvrira les exceptions liées aux animations (Framer Motion).
-    
-    // Écoute du Scroll (déclenché 300ms après l'arrêt) : Gère parfaitement Framer Motion
-    let scrollTimeout: ReturnType<typeof setTimeout>;
-    const handleScroll = () => {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(triggerTranslate, 300);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Force une fois au montage
+    // Force une seule fois au montage pour s'assurer que les premiers éléments sont pris
     setTimeout(triggerTranslate, 500);
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
   }, [language]);
 
 
