@@ -31,16 +31,16 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualit�
       const { data } = await supabase
         .from("content")
         .select("*, categories(name)")
-        .in("type", ["article", "video", "image"]) // 'sport' est retiré car il est désormais mappé sur 'article'
+        .in("type", ["article", "video", "image", "sport"])
         .eq("is_published", true)
         .order("created_at", { ascending: false });
         
       if (data) {
-        // Filtrer manuellement la catégorie "Sport" ou le tag "sport"
-        const sportsArticles = (data as any[]).filter(
-          a => a.categories?.name === "Sport" || a.categories?.name === "Sports" || (a.tags && a.tags.includes("sport"))
+        // Filtrer manuellement la catégorie "Sport" ou le type "sport"
+        const sportsArticles = (data as unknown as Article[]).filter(
+          a => a.categories?.name === "Sport" || a.categories?.name === "Sports" || (a as any).type === "sport"
         );
-        setArticles(sportsArticles as unknown as Article[]);
+        setArticles(sportsArticles);
       }
       setLoading(false);
     };
