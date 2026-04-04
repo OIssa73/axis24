@@ -42,6 +42,22 @@ const LanguageSwitcher = () => {
                     onClick={() => {
                       setLanguage(lang.code);
                       setIsOpen(false);
+                      try {
+                        const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+                        if (selectElement) {
+                          selectElement.value = lang.code;
+                          selectElement.dispatchEvent(new Event('change'));
+                        } else {
+                          const domain = window.location.hostname;
+                          document.cookie = `googtrans=/fr/${lang.code}; path=/;`;
+                          if (domain !== 'localhost') {
+                             document.cookie = `googtrans=/fr/${lang.code}; path=/; domain=.${domain}`;
+                          }
+                          window.location.reload();
+                        }
+                      } catch (e) {
+                         console.error(e);
+                      }
                     }}
                     className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all ${
                       language === lang.code 

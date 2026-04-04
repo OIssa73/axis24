@@ -62,7 +62,13 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>("fr");
+  const [language, setLanguage] = useState<Language>(() => {
+    try {
+      const match = document.cookie.match(/googtrans=\/fr\/(en|fr)/);
+      if (match) return match[1] as Language;
+    } catch (e) {}
+    return "fr";
+  });
 
   const t = (key: string) => {
     return translations[key]?.[language] || key;
