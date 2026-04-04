@@ -14,6 +14,7 @@ interface Article {
   content_type: string;
   category_id: string | null;
   categories?: { name: string } | null;
+  tags?: string[] | null;
 }
 
 interface Props {
@@ -36,7 +37,11 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setArticles(data as unknown as Article[]);
+        // Filtrer pour exclure les contenus qui sont techniquement des articles mais taggués job ou sport
+        const newsArticles = (data as any[]).filter(
+          a => !(a.tags && (a.tags.includes("job") || a.tags.includes("sport")))
+        );
+        setArticles(newsArticles as unknown as Article[]);
       }
       setLoading(false);
     };
