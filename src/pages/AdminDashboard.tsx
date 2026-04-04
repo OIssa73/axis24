@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Upload, FolderOpen, BarChart3, LogOut, Menu, X, Users, Settings, Megaphone } from "lucide-react";
+import { LayoutDashboard, Upload, FolderOpen, BarChart3, LogOut, Menu, X, Users, Settings, Megaphone, Sun, Moon } from "lucide-react";
 import useAdminAuth from "@/hooks/useAdminAuth";
 import AdminStats from "@/components/admin/AdminStats";
 import AdminContent from "@/components/admin/AdminContent";
@@ -10,6 +10,7 @@ import AdminUpload from "@/components/admin/AdminUpload";
 import AdminJournalists from "@/components/admin/AdminJournalists";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminAds from "@/components/admin/AdminAds";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const tabs = [
   { id: "stats", label: "Tableau de bord", icon: LayoutDashboard },
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
   const { isAdmin } = useAdminAuth();
   const [activeTab, setActiveTab] = useState("stats");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -96,16 +98,31 @@ const AdminDashboard = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="h-14 border-b border-border flex items-center px-4 gap-4">
-          <button
-            className="lg:hidden text-foreground"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <h2 className="font-display text-xl tracking-wider text-foreground">
-            {tabs.find((t) => t.id === activeTab)?.label}
-          </h2>
+        <header className="h-14 border-b border-border flex items-center px-4 gap-4 justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              className="lg:hidden text-foreground"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <h2 className="font-display text-xl tracking-wider text-foreground">
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </h2>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => {
+                 setIsDark(!isDark);
+                 document.documentElement.classList.toggle('dark');
+               }} 
+               className="p-2 rounded-full border border-border bg-card hover:bg-muted transition-colors text-foreground"
+             >
+               {isDark ? <Sun size={16} /> : <Moon size={16} />}
+             </button>
+             <LanguageSwitcher />
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-6 overflow-auto bg-muted/20">
