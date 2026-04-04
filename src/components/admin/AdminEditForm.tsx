@@ -50,9 +50,17 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
       if (contentData) {
         setTitle(contentData.title);
         setDescription(contentData.description || "");
-        setType(contentData.type as "audio" | "video" | "article" | "image" | "job" | "sport");
+        
+        // Reverse mapping for UI
+        let uiType = contentData.type as "audio" | "video" | "article" | "image" | "job" | "sport";
+        if (contentData.type === "article") {
+          if (contentData.tags?.includes("job")) uiType = "job";
+          else if (contentData.tags?.includes("sport")) uiType = "sport";
+        }
+        setType(uiType);
+        
         setCategoryId(contentData.category_id || "");
-        setTags(contentData.tags?.join(", ") || "");
+        setTags((contentData.tags || []).filter((t: string) => t !== "job" && t !== "sport").join(", "));
         setBody(contentData.body || "");
         setAllowDownload(contentData.allow_download ?? true);
         setThumbnailUrl(contentData.thumbnail_url || "");
@@ -111,12 +119,16 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         .update({
           title,
           description,
-          type,
+          type: (type === "job" || type === "sport") ? "article" : type,
           category_id: categoryId || null,
           file_url: finalFileUrl || null,
           thumbnail_url: finalThumbnailUrl || null,
           body: body || null,
-          tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+          tags: [
+            ...(tags ? tags.split(",").map((t) => t.trim()) : []),
+            ...(type === "job" ? ["job"] : []),
+            ...(type === "sport" ? ["sport"] : []),
+          ],
           allow_download: allowDownload,
           updated_at: new Date().toISOString(),
         })

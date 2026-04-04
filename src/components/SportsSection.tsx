@@ -12,6 +12,7 @@ interface Article {
   thumbnail_url: string | null;
   created_at: string;
   categories?: { name: string } | null;
+  tags?: string[] | null;
 }
 
 interface Props {
@@ -30,16 +31,16 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualit�
       const { data } = await supabase
         .from("content")
         .select("*, categories(name)")
-        .in("type", ["article", "video", "image", "sport"])
+        .in("type", ["article", "video", "image"]) // 'sport' est retiré car il est désormais mappé sur 'article'
         .eq("is_published", true)
         .order("created_at", { ascending: false });
         
       if (data) {
-        // Filtrer manuellement la catégorie "Sport"
-        const sportsArticles = (data as unknown as Article[]).filter(
-          a => a.categories?.name === "Sport" || a.categories?.name === "Sports"
+        // Filtrer manuellement la catégorie "Sport" ou le tag "sport"
+        const sportsArticles = (data as any[]).filter(
+          a => a.categories?.name === "Sport" || a.categories?.name === "Sports" || (a.tags && a.tags.includes("sport"))
         );
-        setArticles(sportsArticles);
+        setArticles(sportsArticles as unknown as Article[]);
       }
       setLoading(false);
     };

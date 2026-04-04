@@ -30,7 +30,8 @@ const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez
       const { data } = await supabase
         .from("content")
         .select("*, categories(name)")
-        .eq("type", "job")
+        .eq("type", "article") // Nous utilisons désormais le conteneur 'article'
+        .contains("tags", ["job"]) // Et nous filtrons par le tag job
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {

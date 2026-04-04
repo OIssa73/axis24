@@ -11,6 +11,7 @@ interface ContentItem {
   is_published: boolean;
   views_count: number;
   created_at: string;
+  tags?: string[] | null;
 }
 
 const AdminContent = () => {
@@ -21,7 +22,11 @@ const AdminContent = () => {
 
   const fetchContent = async () => {
     let query = supabase.from("content").select("*").order("created_at", { ascending: false });
-    if (filterType !== "all") query = query.eq("type", filterType);
+    if (filterType !== "all" && !["job", "sport"].includes(filterType)) {
+      query = query.eq("type", filterType);
+    } else if (["job", "sport"].includes(filterType)) {
+      query = query.eq("type", "article").contains("tags", [filterType]);
+    }
     const { data } = await query;
     if (data) setContent(data as ContentItem[]);
   };
@@ -49,7 +54,7 @@ const AdminContent = () => {
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-6">
-        {["all", "audio", "video", "article", "image"].map((type) => (
+        {["all", "audio", "video", "article", "image", "job", "sport"].map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type)}
@@ -75,12 +80,14 @@ const AdminContent = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    item.tags?.includes("job") ? "bg-orange-500/20 text-orange-400" :
+                    item.tags?.includes("sport") ? "bg-red-500/20 text-red-500" :
                     item.type === "audio" ? "bg-primary/20 text-primary" :
                     item.type === "video" ? "bg-blue-500/20 text-blue-400" :
                     item.type === "article" ? "bg-green-500/20 text-green-400" :
                     "bg-yellow-500/20 text-yellow-400"
                   }`}>
-                    {item.type}
+                    {item.tags?.includes("job") ? "Job" : item.tags?.includes("sport") ? "Sport" : item.type}
                   </span>
                   {!item.is_published && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Brouillon</span>

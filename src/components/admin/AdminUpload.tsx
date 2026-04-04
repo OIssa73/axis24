@@ -95,12 +95,16 @@ const AdminUpload = () => {
       const { error } = await supabase.from("content").insert({
         title,
         description,
-        type,
+        type: (type === "job" || type === "sport") ? "article" : type,
         category_id: categoryId || null,
         file_url: fileUrl || null,
         thumbnail_url: thumbnailUrl || null,
         body: body || null,
-        tags: tags ? tags.split(",").map((t) => t.trim()) : [],
+        tags: [
+          ...(tags ? tags.split(",").map((t) => t.trim()) : []),
+          ...(type === "job" ? ["job"] : []),
+          ...(type === "sport" ? ["sport"] : []),
+        ],
         allow_download: allowDownload,
         created_by: user?.id,
         is_published: true,
