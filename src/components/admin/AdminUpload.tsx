@@ -103,6 +103,7 @@ const AdminUpload = () => {
         tags: tags ? tags.split(",").map((t) => t.trim()) : [],
         allow_download: allowDownload,
         created_by: user?.id,
+        is_published: true,
       });
 
       if (error) throw error;
@@ -116,9 +117,14 @@ const AdminUpload = () => {
       setThumbnail(null);
       setAllowDownload(true);
       setProgress(0);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setProgress(0);
-      toast({ title: "Échec de l'envoi", description: err instanceof Error ? err.message : "Erreur", variant: "destructive" });
+      console.error("Upload error:", err);
+      toast({ 
+        title: "Échec de l'envoi", 
+        description: err.message || err.error_description || "Une erreur est survenue lors de l'enregistrement.", 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
