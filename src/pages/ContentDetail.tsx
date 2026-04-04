@@ -39,7 +39,7 @@ const ContentDetail = () => {
         .single();
       
       if (data) {
-        setContent(data as any);
+        setContent(data as unknown as Content);
         // Increment views
         await supabase.from("content").update({ views_count: (data.views_count || 0) + 1 }).eq("id", id);
       }

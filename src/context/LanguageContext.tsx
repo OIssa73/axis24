@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 type Language = "fr" | "en";
@@ -15,7 +16,7 @@ const translations: Translations = {
   actualites: { fr: "Actualités", en: "News" },
   images: { fr: "Infos en images", en: "Pic News" },
   contact: { fr: "Contact", en: "Contact" },
-  direct: { fr: "EN DIRECT", en: "LIVE" },
+  direct: { fr: "Direct", en: "Live" },
   journalistes: { fr: "NOS JOURNALISTES", en: "OUR JOURNALISTS" },
   equipe: { fr: "L'Équipe", en: "The Team" },
   hero_subtitle: { fr: "Radio & Télévision — L'information en continu, où que vous soyez.", en: "Radio & TV — Non-stop information, wherever you are." },
@@ -26,6 +27,12 @@ const translations: Translations = {
   news_desc: { fr: "Toute l'information décryptée pour vous.", en: "All the information decrypted for you." },
   read_more: { fr: "Lire la suite", en: "Read more" },
   view_all: { fr: "Voir tous les articles", en: "View all articles" },
+  plus: { fr: "Plus", en: "More" },
+  sports: { fr: "Sports", en: "Sports" },
+  emploi: { fr: "Jobs & Emploi", en: "Jobs" },
+  espace_pub: { fr: "Espace Publicitaire", en: "Advertising Space" },
+  partenaires: { fr: "Partenaires", en: "Partners" },
+  devenir_partenaire: { fr: "Devenir Partenaire", en: "Become a Partner" },
 };
 
 interface LanguageContextType {

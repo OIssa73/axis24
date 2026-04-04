@@ -40,11 +40,12 @@ const InfoImages = () => {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setItems(data as any);
+        setItems(data as unknown as ImageContent[]);
         // Extract unique category names for filters
         const catNames = new Set<string>();
-        data.forEach((item: any) => {
-          if (item.categories?.name) catNames.add(item.categories.name);
+        data.forEach((item: unknown) => {
+          const content = item as ImageContent;
+          if (content.categories?.name) catNames.add(content.categories.name);
         });
         setCategories(["Tout", ...Array.from(catNames)]);
       }

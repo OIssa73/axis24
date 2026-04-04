@@ -1,11 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 0 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 85% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 0 85% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 0 85% 55%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 0 85% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 0 85% 55%;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(0 85% 55% / 0.1), hsl(0 85% 55% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 42%));
+    --gradient-gold: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 40%));
+    --shadow-glow: 0 0 15px hsl(0 85% 55% / 0.15);
+    --shadow-card: 0 4px 15px hsl(0 0% 0% / 0.05);
+  }
+
+  .dark {
     --background: 220 20% 6%;
     --foreground: 40 20% 95%;
 
@@ -49,8 +97,8 @@
     --gradient-hero: linear-gradient(135deg, hsl(0 85% 55% / 0.15), hsl(0 85% 55% / 0.1));
     --gradient-primary: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 42%));
     --gradient-gold: linear-gradient(135deg, hsl(0, 85%, 55%), hsl(0, 70%, 40%));
-    --shadow-glow: 0 0 40px hsl(0 85% 55% / 0.2);
-    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 20px hsl(0 85% 55% / 0.15);
+    --shadow-card: 0 8px 25px hsl(0 0% 0% / 0.3);
   }
 }
 
@@ -67,6 +115,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 0.02em;
+    font-weight: 400; /* Prevent faux-bold rendering */
   }
 }
 
@@ -100,7 +149,7 @@
   }
 
   .btn-primary-glow:hover {
-    box-shadow: 0 0 60px hsl(0 85% 55% / 0.35);
+    box-shadow: 0 0 25px hsl(0 85% 55% / 0.25);
     transform: translateY(-1px);
   }
 

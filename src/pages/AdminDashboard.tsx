@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Upload, FolderOpen, BarChart3, LogOut, Menu, X, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Upload, FolderOpen, BarChart3, LogOut, Menu, X, Users, Settings, Megaphone } from "lucide-react";
 import useAdminAuth from "@/hooks/useAdminAuth";
 import AdminStats from "@/components/admin/AdminStats";
 import AdminContent from "@/components/admin/AdminContent";
@@ -9,6 +9,7 @@ import AdminCategories from "@/components/admin/AdminCategories";
 import AdminUpload from "@/components/admin/AdminUpload";
 import AdminJournalists from "@/components/admin/AdminJournalists";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminAds from "@/components/admin/AdminAds";
 
 const tabs = [
   { id: "stats", label: "Tableau de bord", icon: LayoutDashboard },
@@ -16,6 +17,7 @@ const tabs = [
   { id: "upload", label: "Uploader", icon: Upload },
   { id: "categories", label: "Catégories", icon: FolderOpen },
   { id: "journalists", label: "Journalistes", icon: Users },
+  { id: "ads", label: "Publicités", icon: Megaphone },
   { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
@@ -112,6 +114,7 @@ const AdminDashboard = () => {
           {activeTab === "upload" && <AdminUpload />}
           {activeTab === "categories" && <AdminCategories />}
           {activeTab === "journalists" && <AdminJournalists />}
+          {activeTab === "ads" && <AdminAds />}
           {activeTab === "settings" && <AdminSettings />}
         </main>
       </div>

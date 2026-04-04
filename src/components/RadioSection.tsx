@@ -16,7 +16,12 @@ interface PodcastContent {
   categories?: { name: string } | null;
 }
 
-const RadioSection = () => {
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissions où que vous soyez." }: Props) => {
   const [podcasts, setPodcasts] = useState<PodcastContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentAudio, setCurrentAudio] = useState<PodcastContent | null>(null);
@@ -32,14 +37,15 @@ const RadioSection = () => {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setPodcasts(data as any);
+        setPodcasts(data as unknown as PodcastContent[]);
         if (data.length > 0 && !currentAudio) {
-          setCurrentAudio(data[0] as any);
+          setCurrentAudio(data[0] as unknown as PodcastContent);
         }
       }
       setLoading(false);
     };
     fetchPodcasts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const categories = ["Tous", ...Array.from(new Set(podcasts.map(p => p.categories?.name || "Général")))];
@@ -58,7 +64,7 @@ const RadioSection = () => {
   };
 
   return (
-    <section id="radio" className="py-24 relative overflow-hidden bg-background">
+    <section id="radio" className="py-12 relative overflow-hidden bg-background">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -71,8 +77,8 @@ const RadioSection = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
             <Radio size={12} /> Radio & Podcasts
           </div>
-          <h2 className="section-heading text-foreground">RADIO AXIS<span className="text-secondary">24</span></h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">Écoutez nos émissions où que vous soyez.</p>
+          <h2 className="section-heading text-foreground uppercase">{title}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{subtitle}</p>
         </motion.div>
 
         {/* Global Player Principal (Static) */}
@@ -177,7 +183,7 @@ const RadioSection = () => {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors text-sm">{pod.title}</h4>
+                      <h4 className="font-normal tracking-wide text-foreground truncate group-hover:text-primary transition-colors text-sm">{pod.title}</h4>
                       <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{pod.description}</p>
                       <div className="flex items-center gap-3 mt-2 text-[9px] text-muted-foreground font-bold uppercase tracking-wider">
                         <span className="flex items-center gap-1">

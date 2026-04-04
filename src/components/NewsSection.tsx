@@ -16,7 +16,12 @@ interface Article {
   categories?: { name: string } | null;
 }
 
-const NewsSection = () => {
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information décryptée pour vous." }: Props) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Tous");
@@ -31,7 +36,7 @@ const NewsSection = () => {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setArticles(data as any);
+        setArticles(data as unknown as Article[]);
       }
       setLoading(false);
     };
@@ -45,7 +50,7 @@ const NewsSection = () => {
     : articles.filter(a => (a.categories?.name || "Général") === activeTab);
 
   return (
-    <section id="news" className="py-24 bg-background relative overflow-hidden">
+    <section id="news" className="py-12 bg-background relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
            initial={{ opacity: 0, y: 20 }}
@@ -56,8 +61,8 @@ const NewsSection = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
             <Newspaper size={12} /> {t("actualites")}
           </div>
-          <h2 className="section-heading text-foreground uppercase">{t("le_mag")}</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t("news_desc")}</p>
+          <h2 className="section-heading text-foreground uppercase">{title}</h2>
+          <p className="text-muted-foreground text-sm max-w-2xl mx-auto mt-4">{subtitle}</p>
         </motion.div>
 
         {/* Categories Tabs */}

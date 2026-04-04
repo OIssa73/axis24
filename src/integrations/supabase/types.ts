@@ -148,15 +148,15 @@ export type Database = {
       site_settings: {
         Row: {
           key: string
-          value: any
+          value: Json
         }
         Insert: {
           key: string
-          value: any
+          value: Json
         }
         Update: {
           key?: string
-          value?: any
+          value?: Json
         }
         Relationships: []
       }

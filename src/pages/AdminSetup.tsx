@@ -28,8 +28,9 @@ const AdminSetup = () => {
       setDone(true);
       toast({ title: "Compte admin créé !" });
       setTimeout(() => navigate("/admin/login"), 2000);
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Une erreur est survenue";
+      toast({ title: "Erreur", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

@@ -33,7 +33,7 @@ const NewsTicker = () => {
   return (
     <div className="bg-primary/90 backdrop-blur-md text-primary-foreground py-2 border-y border-white/10 overflow-hidden relative z-50">
       <div className="container mx-auto px-4 flex items-center gap-4">
-        <div className="flex items-center gap-2 font-display text-[10px] font-bold uppercase tracking-[0.2em] shrink-0 bg-white/20 px-3 py-1 rounded-full whitespace-nowrap">
+        <div className="flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.2em] shrink-0 bg-white/20 px-3 py-1 rounded-full whitespace-nowrap">
           <TrendingUp size={12} />
           Flash Infos
         </div>

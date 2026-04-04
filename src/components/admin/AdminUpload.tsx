@@ -14,7 +14,7 @@ interface Category {
 const AdminUpload = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<"audio" | "video" | "article" | "image">("audio");
+  const [type, setType] = useState<"audio" | "video" | "article" | "image" | "job" | "sport">("audio");
   const [categoryId, setCategoryId] = useState("");
   const [tags, setTags] = useState("");
   const [body, setBody] = useState("");
@@ -116,9 +116,9 @@ const AdminUpload = () => {
       setThumbnail(null);
       setAllowDownload(true);
       setProgress(0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setProgress(0);
-      toast({ title: "Échec de l'envoi", description: err.message, variant: "destructive" });
+      toast({ title: "Échec de l'envoi", description: err instanceof Error ? err.message : "Erreur", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -138,13 +138,15 @@ const AdminUpload = () => {
         <label className="text-sm text-muted-foreground mb-1 block">Type de contenu</label>
         <select
           value={type}
-          onChange={(e) => setType(e.target.value as any)}
+          onChange={(e) => setType(e.target.value as "audio" | "video" | "article" | "image" | "job" | "sport")}
           className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
         >
           <option value="audio">Audio (Podcast / Émission radio)</option>
           <option value="video">Vidéo (Émission TV / Replay)</option>
           <option value="article">Article</option>
           <option value="image">Image / Infographie</option>
+          <option value="job">Offre d'emploi</option>
+          <option value="sport">Contenu Sportif</option>
         </select>
       </div>
 
@@ -171,7 +173,7 @@ const AdminUpload = () => {
         />
       </div>
 
-      {type === "article" && (
+      {(type === "article" || type === "job") && (
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">Contenu de l'article</label>
           <textarea

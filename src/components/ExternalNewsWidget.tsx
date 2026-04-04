@@ -89,7 +89,7 @@ const ExternalNewsWidget = () => {
                   <Clock size={12} />
                   {news.time}
                 </div>
-                <h3 className="font-semibold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                <h3 className="font-normal tracking-wide text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-2">
                   {news.title}
                 </h3>
                 <p className="text-xs text-muted-foreground line-clamp-3 mb-4 flex-1">

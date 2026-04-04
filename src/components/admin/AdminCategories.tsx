@@ -82,6 +82,8 @@ const AdminCategories = () => {
     tv: "Télévision",
     article: "Articles",
     image: "Images",
+    job: "Jobs",
+    sport: "Sports",
   };
 
   const grouped = categories.reduce((acc, cat) => {
@@ -109,6 +111,8 @@ const AdminCategories = () => {
           <option value="tv">Télévision</option>
           <option value="article">Articles</option>
           <option value="image">Images</option>
+          <option value="job">Jobs et Offres d'emploi</option>
+          <option value="sport">Sports</option>
         </select>
         <button type="submit" className="btn-primary-glow flex items-center gap-2 whitespace-nowrap">
           <Plus size={16} /> Ajouter

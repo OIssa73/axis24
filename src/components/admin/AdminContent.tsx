@@ -26,6 +26,7 @@ const AdminContent = () => {
     if (data) setContent(data as ContentItem[]);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchContent(); }, [filterType]);
 
   const togglePublish = async (id: string, current: boolean) => {

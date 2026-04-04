@@ -16,7 +16,12 @@ interface VideoContent {
   categories?: { name: string } | null;
 }
 
-const TVSection = () => {
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes nos émissions et reportages en vidéo." }: Props) => {
   const [replays, setReplays] = useState<VideoContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -31,7 +36,7 @@ const TVSection = () => {
         .eq("is_published", true)
         .order("created_at", { ascending: false });
       if (data) {
-        setReplays(data as any);
+        setReplays(data as unknown as VideoContent[]);
       }
       setLoading(false);
     };
@@ -45,7 +50,7 @@ const TVSection = () => {
     : replays.filter(r => (r.categories?.name || "Général") === activeTab);
 
   return (
-    <section id="television" className="py-24 bg-muted/10">
+    <section id="television" className="py-12 bg-muted/10">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -56,10 +61,10 @@ const TVSection = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest mb-4">
             <MonitorPlay size={12} /> Streaming & Replay
           </div>
-          <h2 className="section-heading text-foreground">
-            TÉLÉVISION AXIS<span className="text-primary">24</span>
+          <h2 className="section-heading text-foreground uppercase">
+            {title}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">Retrouvez toutes nos émissions et reportages en vidéo.</p>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{subtitle}</p>
         </motion.div>
 
         {/* Categories Tabs */}
@@ -144,7 +149,7 @@ const TVSection = () => {
                   </div>
                   
                   <div className="p-5 flex-1 flex flex-col">
-                    <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-secondary transition-colors text-lg mb-2">{replay.title}</h4>
+                    <h4 className="font-normal tracking-wide text-foreground line-clamp-1 group-hover:text-secondary transition-colors text-lg mb-2">{replay.title}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-4 flex-1">{replay.description}</p>
                     
                     <div className="flex items-center justify-between pt-4 border-t border-border/40">
