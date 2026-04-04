@@ -70,6 +70,40 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return "fr";
   });
 
+  // Détecteur Auto-Traduction Global (Scroll et Asynchrone)
+  React.useEffect(() => {
+    if (language === "fr") return;
+
+    const triggerTranslate = () => {
+      try {
+        const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+        if (select) {
+          select.dispatchEvent(new Event('change'));
+        }
+      } catch (e) {}
+    };
+
+    // 1. Boucle persistante (toutes les 2.5s) : Attrape les données Supabase qui finissent de charger
+    const interval = setInterval(triggerTranslate, 2500);
+
+    // 2. Écoute du Scroll (déclenché 300ms après l'arrêt) : Gère les animations Framer Motion
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(triggerTranslate, 300);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Force une fois au montage
+    setTimeout(triggerTranslate, 500);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [language]);
+
+
   const t = (key: string) => {
     return translations[key]?.[language] || key;
   };
