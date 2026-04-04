@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Clock, Eye, X, Info, MonitorPlay } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface VideoContent {
   id: string;
@@ -26,6 +27,7 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("Tous");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -62,9 +64,9 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
             <MonitorPlay size={12} /> Streaming & Replay
           </div>
           <h2 className="section-heading text-foreground uppercase">
-            {title}
+            {t(title)}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{subtitle}</p>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t(subtitle)}</p>
         </motion.div>
 
         {/* Categories Tabs */}

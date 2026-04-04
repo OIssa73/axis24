@@ -22,7 +22,7 @@ const Footer = () => {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-center mt-2 md:mt-0">
             <p className="text-xs text-muted-foreground">
-              © 2026 AXIS24 Media Groupe. Tous droits réservés.
+              {t("© 2026 AXIS24 Media Groupe. Tous droits réservés.")}
             </p>
             <Link to="/admin/login" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               Admin

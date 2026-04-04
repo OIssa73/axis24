@@ -61,8 +61,8 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
             <Newspaper size={12} /> {t("actualites")}
           </div>
-          <h2 className="section-heading text-foreground uppercase">{title}</h2>
-          <p className="text-muted-foreground text-sm max-w-2xl mx-auto mt-4">{subtitle}</p>
+          <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
+          <p className="text-muted-foreground text-sm max-w-2xl mx-auto mt-4">{t(subtitle)}</p>
         </motion.div>
 
         {/* Categories Tabs */}

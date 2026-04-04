@@ -51,11 +51,11 @@ const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez
            className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
-            <Briefcase size={12} /> {language === "fr" ? "Emploi" : "Jobs"}
+            <Briefcase size={12} /> {t("Emploi")}
           </div>
-          <h2 className="section-heading text-foreground uppercase">{language === "fr" ? title : "Jobs & Careers"}</h2>
+          <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mt-4">
-            {language === "fr" ? subtitle : "Discover our job offers and career opportunities."}
+            {t(subtitle)}
           </p>
         </motion.div>
 
@@ -67,7 +67,7 @@ const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez
           </div>
         ) : jobs.length === 0 ? (
           <p className="text-muted-foreground text-center py-20">
-            {language === "fr" ? "Aucune offre d'emploi pour le moment." : "No job offers at the moment."}
+            {t("Aucune offre d'emploi pour le moment.")}
           </p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -116,7 +116,7 @@ const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez
                     to={`/content/${job.id}`} 
                     className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary group-hover:gap-3 transition-all"
                   >
-                    {language === "fr" ? "POSTULER" : "APPLY"} <ChevronRight size={14} />
+                    {t("POSTULER")} <ChevronRight size={14} />
                   </Link>
                 </div>
               </motion.article>

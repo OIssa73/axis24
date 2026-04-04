@@ -58,9 +58,9 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualit√
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
             <Trophy size={12} /> SPORTS
           </div>
-          <h2 className="section-heading text-foreground uppercase">{title}</h2>
+          <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mt-4">
-            {language === "fr" ? subtitle : "All the live sports news."}
+            {t(subtitle)}
           </p>
         </motion.div>
 
@@ -72,7 +72,7 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualit√
           </div>
         ) : articles.length === 0 ? (
           <p className="text-muted-foreground text-center py-20">
-            {language === "fr" ? "Aucun contenu sportif." : "No sports content."}
+            {t("Aucun contenu sportif.")}
           </p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">

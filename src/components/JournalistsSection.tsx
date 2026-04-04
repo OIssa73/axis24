@@ -54,10 +54,10 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
               <Users size={12} /> {t("equipe")}
             </div>
-            <h2 className="section-heading text-foreground uppercase">{t("journalistes")}</h2>
+            <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-muted-foreground/50 italic text-xs">
-            Faites défiler pour voir toute l'équipe <ChevronRight size={14} />
+            {t("Faites défiler pour voir toute l'équipe")} <ChevronRight size={14} />
           </div>
         </div>
 

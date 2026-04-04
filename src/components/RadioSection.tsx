@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Headphones, Clock, Volume2, Eye, Info, Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PodcastContent {
   id: string;
@@ -27,6 +28,7 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
   const [currentAudio, setCurrentAudio] = useState<PodcastContent | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState("Tous");
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchPodcasts = async () => {
@@ -77,8 +79,8 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
             <Radio size={12} /> Radio & Podcasts
           </div>
-          <h2 className="section-heading text-foreground uppercase">{title}</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{subtitle}</p>
+          <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t(subtitle)}</p>
         </motion.div>
 
         {/* Global Player Principal (Static) */}
