@@ -44,8 +44,9 @@ const AdminJournalists = () => {
         }));
         setJournalists(merged as Journalist[]);
       }
-    } catch (error: any) {
-      toast({ title: "Erreur de chargement", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast({ title: "Erreur de chargement", description: err.message, variant: "destructive" });
     }
   };
 
@@ -138,10 +139,11 @@ const AdminJournalists = () => {
       setFile(null);
       setEditingId(null);
       fetchJournalists();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({ 
         title: "Erreur", 
-        description: error.message || (typeof error === 'string' ? error : "Erreur inconnue lors de l'enregistrement"), 
+        description: err.message || (typeof err === 'string' ? err : "Erreur inconnue lors de l'enregistrement"), 
         variant: "destructive" 
       });
     } finally {

@@ -108,8 +108,9 @@ const AdminAds = () => {
         banner: { ...prev.banner, imageUrl: data.publicUrl }
       }));
       toast({ title: "Image ajoutée", description: "L'image a été téléchargée avec succès." });
-    } catch (error: any) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
