@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Megaphone, Star, Loader2 } from "lucide-react";
+import { ExternalLink, Megaphone, Star, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Partner {
@@ -36,6 +36,7 @@ const AdsWidget = () => {
   const [config, setConfig] = useState<AdsConfig>(defaultAdsConfig);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAd, setSelectedAd] = useState<AdBanner | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -117,22 +118,20 @@ const AdsWidget = () => {
             {activeBanners.length > 0 ? (
               <div className="relative aspect-[21/9] md:aspect-[32/9] rounded-2xl overflow-hidden glass-card shadow-lg flex-1 group">
                 <AnimatePresence mode="wait">
-                  <motion.a 
+                  <motion.button 
                     key={currentBanner?.id}
-                    href={currentBanner?.linkUrl || "#"}
-                    target={currentBanner?.linkUrl ? "_blank" : "_self"}
-                    rel="noopener noreferrer"
+                    onClick={() => setSelectedAd(currentBanner)}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="absolute inset-0 block w-full h-full"
+                    className="absolute inset-0 block w-full h-full text-left"
                   >
                     {currentBanner?.imageUrl ? (
                       <img 
                         src={currentBanner.imageUrl} 
                         alt="Publicité" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-muted" 
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 bg-background" 
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 border-dashed border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
@@ -147,7 +146,7 @@ const AdsWidget = () => {
                         </p>
                       </div>
                     )}
-                  </motion.a>
+                  </motion.button>
                 </AnimatePresence>
                 
                 <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded border border-white/10">
@@ -213,6 +212,61 @@ const AdsWidget = () => {
           </div>
         </div>
       </div>
+
+      {/* POP-UP MODAL PUBLICITAIRE */}
+      <AnimatePresence>
+        {selectedAd && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-background rounded-2xl overflow-hidden shadow-2xl border border-border/50 max-w-4xl w-full max-h-[90vh] flex flex-col relative"
+            >
+              <button 
+                onClick={() => setSelectedAd(null)}
+                className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors"
+              >
+                 <X size={18} />
+              </button>
+
+              <div className="flex-1 overflow-auto bg-muted/10 p-6 flex flex-col items-center">
+                {selectedAd.imageUrl ? (
+                  <img 
+                    src={selectedAd.imageUrl} 
+                    alt="Publicité" 
+                    className="w-full h-auto max-h-[55vh] object-contain rounded-xl shadow-sm mb-8 bg-background border border-border/50" 
+                  />
+                ) : (
+                  <div className="w-full h-64 flex flex-col items-center justify-center border-dashed border-2 border-primary/20 bg-primary/5 rounded-xl mb-6">
+                    <p className="text-xl font-display text-primary tracking-tighter">AXIS24 MEDIA HUB</p>
+                  </div>
+                )}
+                
+                <h3 className="text-2xl font-bold uppercase tracking-wide text-foreground text-center mb-3">
+                  {selectedAd.title || "ESPACE SPONSORISÉ"}
+                </h3>
+                
+                {selectedAd.description && (
+                  <p className="text-muted-foreground text-center max-w-2xl text-sm mb-8">
+                    {selectedAd.description}
+                  </p>
+                )}
+                
+                <a 
+                  href={selectedAd.linkUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-primary text-primary-foreground font-bold px-8 py-3 rounded-full shadow-lg shadow-primary/30 flex items-center gap-2 hover:bg-primary/90 hover:scale-105 transition-all text-sm mb-4"
+                >
+                  Accéder à l'offre <ExternalLink size={16} />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </section>
   );
 };

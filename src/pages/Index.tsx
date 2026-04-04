@@ -58,6 +58,7 @@ const Index = () => {
     jobs: true,
   });
   const [titles, setTitles] = useState<SectionTitles>(defaultTitles);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -73,9 +74,19 @@ const Index = () => {
         const titlesData = data.find(d => d.key === "section_titles");
         if (titlesData) setTitles({ ...defaultTitles, ...(titlesData.value as unknown as SectionTitles) });
       }
+      setLoadingSettings(false);
     };
     fetchSettings();
   }, []);
+
+  if (loadingSettings) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Navbar />
+        <div className="w-8 h-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
