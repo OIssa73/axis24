@@ -83,10 +83,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {}
     };
 
-    // 1. Boucle persistante (toutes les 2.5s) : Attrape les données Supabase qui finissent de charger
-    const interval = setInterval(triggerTranslate, 2500);
-
-    // 2. Écoute du Scroll (déclenché 300ms après l'arrêt) : Gère les animations Framer Motion
+    // On ne garde plus la boucle `setInterval` qui causait un clignotement / rafraîchissement constant.
+    // L'ajout de nouveaux éléments dans le DOM est souvent géré par Google Translate nativement, 
+    // et le Scroll couvrira les exceptions liées aux animations (Framer Motion).
+    
+    // Écoute du Scroll (déclenché 300ms après l'arrêt) : Gère parfaitement Framer Motion
     let scrollTimeout: ReturnType<typeof setTimeout>;
     const handleScroll = () => {
       clearTimeout(scrollTimeout);
@@ -98,7 +99,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(triggerTranslate, 500);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [language]);
