@@ -45,6 +45,9 @@ const ContentDetail = () => {
    * Récupère les données du contenu et augmente le compteur de vues.
    */
   useEffect(() => {
+    // S'assure que la page s'ouvre toujours tout en haut (évite de devoir scroller)
+    window.scrollTo(0, 0);
+    
     const fetchContent = async () => {
       if (!id) return;
       

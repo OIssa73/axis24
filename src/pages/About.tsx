@@ -3,11 +3,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, BookOpen, Target, Users } from "lucide-react";
+import { Info, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const About = () => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Valeur par défaut
   const defaultContent = `
@@ -84,6 +86,7 @@ Nous nous engageons à :
       setLoading(false);
     };
 
+    window.scrollTo(0, 0); // On s'assure d'être en haut de la page
     fetchContent();
   }, []);
 
@@ -92,6 +95,17 @@ Nous nous engageons à :
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-32 max-w-4xl">
+        {/* Bouton retour */}
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-all mb-8 group uppercase text-xs font-bold tracking-widest"
+        >
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+          Revenir en arrière
+        </motion.button>
+        
         <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
