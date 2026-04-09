@@ -1,10 +1,15 @@
+// Importation des outils React pour les états et effets
 import { useState, useEffect } from "react";
+// Importation de Framer Motion pour les animations de liste
 import { motion, AnimatePresence } from "framer-motion";
+// Importation des composants globaux
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import BackButton from "@/components/BackButton";
+import BackButton from "@/components/BackButton"; // Bouton de retour universel
+// Importation de la connexion Supabase
 import { supabase } from "@/integrations/supabase/client";
 
+/** Structure d'un élément image récupéré en BDD */
 interface ImageContent {
   id: string;
   title: string;
@@ -16,6 +21,7 @@ interface ImageContent {
   categories?: { name: string } | null;
 }
 
+/** Couleurs de badges par défaut pour les catégories */
 const categoryColors: Record<string, string> = {
   Politique: "bg-primary/20 text-primary",
   Sport: "bg-primary/20 text-primary",
@@ -25,12 +31,20 @@ const categoryColors: Record<string, string> = {
   Santé: "bg-primary/20 text-primary",
 };
 
+/**
+ * Composant INFO IMAGES.
+ * Affiche une galerie de photos d'actualité filtrable par thématique.
+ */
 const InfoImages = () => {
-  const [active, setActive] = useState("Tout");
-  const [items, setItems] = useState<ImageContent[]>([]);
+  // --- ÉTATS ---
+  const [active, setActive] = useState("Tout"); // Filtre de catégorie sélectionné
+  const [items, setItems] = useState<ImageContent[]>([]); // Liste des images
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>(["Tout"]);
+  const [categories, setCategories] = useState<string[]>(["Tout"]); // Liste des catégories disponibles
 
+  /**
+   * Récupère toutes les images publiées.
+   */
   useEffect(() => {
     const fetchImages = async () => {
       const { data } = await supabase
@@ -39,13 +53,14 @@ const InfoImages = () => {
         .eq("type", "image")
         .eq("is_published", true)
         .order("created_at", { ascending: false });
+      
       if (data) {
         setItems(data as unknown as ImageContent[]);
-        // Extract unique category names for filters
+        
+        // Extraction dynamique des catégories présentes dans les données pour créer les filtres
         const catNames = new Set<string>();
-        data.forEach((item: unknown) => {
-          const content = item as ImageContent;
-          if (content.categories?.name) catNames.add(content.categories.name);
+        data.forEach((item: any) => {
+          if (item.categories?.name) catNames.add(item.categories.name);
         });
         setCategories(["Tout", ...Array.from(catNames)]);
       }
@@ -54,7 +69,10 @@ const InfoImages = () => {
     fetchImages();
   }, []);
 
+  // Filtrage local en fonction de la catégorie active
   const filtered = active === "Tout" ? items : items.filter((a) => a.categories?.name === active);
+  
+  // Fonctions utilitaires pour le rendu
   const getTag = (item: ImageContent) => item.categories?.name || item.tags?.[0] || "Info";
   const getImage = (item: ImageContent) => item.file_url || item.thumbnail_url || "/placeholder.svg";
 
@@ -63,33 +81,37 @@ const InfoImages = () => {
       <Navbar />
       <div className="pt-16">
         <BackButton />
-        <section className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+        
+        <section className="py-24 relative overflow-hidden">
+          {/* Arrière-plan stylisé */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/5 to-background" />
+          
           <div className="container mx-auto px-4 relative z-10">
+            {/* --- EN-TÊTE DE SECTION --- */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12"
+              className="text-center mb-16"
             >
-              <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-2">
-                L'info en images
+              <p className="text-primary font-bold text-xs uppercase tracking-[0.4em] mb-4">
+                Le regard de la rédaction
               </p>
-              <h1 className="section-heading text-foreground">INFOS EN IMAGES</h1>
-              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-                Retrouvez l'essentiel de l'actualité à travers des visuels percutants couvrant la politique, le sport, la technologie, la culture et bien plus.
+              <h1 className="section-heading text-foreground font-display text-5xl md:text-7xl uppercase tracking-tighter">L'INFO EN IMAGES</h1>
+              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto italic">
+                Découvrez l'essentiel de l'actualité à travers nos plus beaux clichés et reportages photographiques.
               </p>
             </motion.div>
 
-            {/* Category filters */}
-            <div className="flex flex-wrap justify-center gap-2 mb-12">
+            {/* --- BARRE DE FILTRES --- */}
+            <div className="flex flex-wrap justify-center gap-3 mb-16 px-4">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActive(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`px-6 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
                     active === cat
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                      : "bg-muted/30 text-muted-foreground hover:bg-muted font-medium"
                   }`}
                 >
                   {cat}
@@ -97,50 +119,55 @@ const InfoImages = () => {
               ))}
             </div>
 
+            {/* --- GRILLE D'IMAGES --- */}
             {loading ? (
-              <p className="text-center text-muted-foreground">Chargement...</p>
+              <p className="text-center text-muted-foreground uppercase tracking-widest text-xs animate-pulse">Chargement de la galerie...</p>
             ) : filtered.length === 0 ? (
-              <p className="text-center text-muted-foreground">Aucun contenu pour le moment.</p>
+              <p className="text-center text-muted-foreground italic">Aucune image disponible dans cette catégorie.</p>
             ) : (
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  transition={{ duration: 0.4 }}
+                  className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
                 >
                   {filtered.map((article, i) => (
                     <motion.article
                       key={article.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="glass-card overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors"
+                      transition={{ delay: i * 0.05 }}
+                      className="glass-card overflow-hidden group cursor-pointer hover:border-primary/40 border-border/50 transition-all shadow-xl shadow-black/5"
                     >
+                      {/* Zone Média */}
                       <div className="relative overflow-hidden aspect-[4/3]">
                         <img
                           src={getImage(article)}
                           alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent opacity-60" />
+                        {/* Badge catégorie */}
                         <span
-                          className={`absolute top-3 left-3 text-xs px-2.5 py-1 rounded-full font-medium ${categoryColors[getTag(article)] || "bg-primary/20 text-primary"}`}
+                          className={`absolute top-4 left-4 text-[9px] px-3 py-1.5 rounded-full font-bold uppercase tracking-widest shadow-lg ${categoryColors[getTag(article)] || "bg-primary/20 text-primary border border-primary/10"}`}
                         >
                           {getTag(article)}
                         </span>
                       </div>
-                      <div className="p-5">
-                        <p className="text-xs text-muted-foreground mb-2">
+
+                      {/* Zone Texte */}
+                      <div className="p-6">
+                        <p className="text-[10px] text-primary/60 font-bold uppercase tracking-[0.2em] mb-3">
                           {new Date(article.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                         </p>
-                        <h3 className="font-display text-lg text-foreground tracking-wide mb-2 line-clamp-2">
+                        <h3 className="font-display text-xl text-foreground tracking-wide mb-3 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
                           {article.title}
                         </h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 opacity-80">
                           {article.description}
                         </p>
                       </div>

@@ -1,15 +1,25 @@
+// Importation des outils de React et React-Router
 import { useState } from "react";
-import { Radio, Tv, Newspaper, Phone, Menu, X, Images, LayoutDashboard, ChevronDown, Trophy, Briefcase } from "lucide-react";
+// Importation des icônes utilisées pour le menu (Radio, TV, Emploi, etc.)
+import { Radio, Tv, Newspaper, Phone, Menu, X, Images, LayoutDashboard, ChevronDown, Trophy, Briefcase, Info } from "lucide-react";
+// Importation des outils d'animation pour l'ouverture fluide du menu mobile
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+// Importation des composants pour changer la langue et le thème
 import LanguageSwitcher from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLanguage } from "@/context/LanguageContext";
 
+/**
+ * Composant NAVBAR (Barre de navigation).
+ * C'est le menu qui reste fixé en haut de l'écran.
+ */
 const Navbar = () => {
+  // État local pour savoir si le menu mobile est ouvert ou fermé
   const [open, setOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t } = useLanguage(); // Utilisation de l'outil de traduction
 
+  // Liste des liens de navigation principaux pour ordinateur
   const navItems = [
     { label: t("accueil"), href: "/" },
     { label: t("radio"), href: "/radio", icon: Radio },
@@ -18,17 +28,22 @@ const Navbar = () => {
     { label: t("contact"), href: "/contact", icon: Phone },
   ];
 
+  // Liste des liens secondaires (accessibles via le menu déroulant "Plus")
   const moreItems = [
     { label: t("images"), href: "/infos-en-images", icon: Images },
     { label: t("sports"), href: "/sports", icon: Trophy },
     { label: t("emploi") || "Jobs", href: "/jobs", icon: Briefcase },
+    { label: "À Propos", href: "/about", icon: Info },
+    { label: "Admin", href: "/admin", icon: LayoutDashboard },
   ];
   
+  // Sur mobile, on combine toutes les catégories en une seule liste
   const allMobileItems = [...navItems, ...moreItems];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
+        {/* Logo de l'application (cliquable pour revenir à l'accueil) */}
         <Link to="/" className="flex items-center gap-2">
           <span className="font-display text-2xl tracking-widest text-foreground">
             AXIS<span className="text-primary">24</span>
@@ -38,7 +53,7 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop */}
+        {/* --- AFFICHAGE ORDINATEUR (Caché sur petit écran) --- */}
         <ul className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <li key={item.label}>
@@ -50,6 +65,7 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
+          {/* Menu déroulant spécial pour la catégorie "Plus" */}
           <li className="relative group">
             <button className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 font-medium uppercase tracking-wider">
               {t("plus") || "Plus"} <ChevronDown size={14} />
@@ -64,32 +80,30 @@ const Navbar = () => {
           </li>
         </ul>
 
+        {/* --- ACTIONS SECONDAIRES (Thème, Langue, Direct) --- */}
         <div className="hidden md:flex items-center gap-3 text-foreground">
           <ThemeToggle />
           <LanguageSwitcher />
-          <Link to="/admin" className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground hover:text-primary transition-all ml-2">
-            <LayoutDashboard size={14} /> Admin
-          </Link>
-          <Link to="/radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold">
+          <Link to="/radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold ml-2">
             <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
             {t("direct")}
           </Link>
         </div>
 
-        {/* Mobile toggle */}
+        {/* --- CONTROLES MOBILE (Cachés sur ordinateur) --- */}
         <div className="md:hidden flex items-center gap-2">
           <ThemeToggle />
           <LanguageSwitcher />
           <button
             className="text-foreground p-1"
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpen(!open)} // Bascule l'ouverture du menu mobile
           >
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* --- MENU MOBILE DÉROULANT --- */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -103,7 +117,7 @@ const Navbar = () => {
                 <li key={item.label}>
                   <Link
                     to={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => setOpen(false)} // Referme le menu quand on clique sur un lien
                     className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors font-semibold text-sm uppercase tracking-wider"
                   >
                     {item.icon && <item.icon size={16} className="text-primary" />}

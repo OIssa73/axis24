@@ -1,9 +1,17 @@
+// Importation des outils de React pour gérer les formulaires et les effets
 import { useState, useEffect } from "react";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
+// Importation de l'outil de notification (Toast)
 import { useToast } from "@/hooks/use-toast";
+// Importation de l'icône d'upload
 import { Upload } from "lucide-react";
+// Importation du composant de barre de progression
 import { Progress } from "@/components/ui/progress";
+// Importation du recadreur d'image
+import ImageCropper from "./ImageCropper";
 
+// Structure d'une Catégorie dans le code
 interface Category {
   id: string;
   name: string;
@@ -11,21 +19,31 @@ interface Category {
   type: string;
 }
 
+/**
+ * Composant ADMIN UPLOAD (Formulaire d'ajout de contenu).
+ * C'est ici que l'administrateur envoie de nouveaux articles, vidéos ou sons.
+ */
 const AdminUpload = () => {
+  // --- ÉTATS DU FORMULAIRE ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  // Type de contenu par défaut : audio
   const [type, setType] = useState<"audio" | "video" | "article" | "image" | "job" | "sport">("audio");
   const [categoryId, setCategoryId] = useState("");
   const [tags, setTags] = useState("");
-  const [body, setBody] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [progress, setProgress] = useState(0);
+  const [body, setBody] = useState(""); // Texte complet pour les articles
+  const [file, setFile] = useState<File | null>(null); // Fichier principal (mp3, mp4, img)
+  const [thumbnail, setThumbnail] = useState<File | null>(null); // Image miniature
+  const [progress, setProgress] = useState(0); // Barre de progression (0 à 100)
   const [allowDownload, setAllowDownload] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Pour le recadreur
   const { toast } = useToast();
 
+  /**
+   * On charge la liste des catégories dès l'ouverture du formulaire.
+   */
   useEffect(() => {
     const fetchCategories = async () => {
       const { data } = await supabase.from("categories").select("*");
@@ -34,33 +52,63 @@ const AdminUpload = () => {
     fetchCategories();
   }, []);
 
+  /**
+   * Gère la sélection d'un fichier et vérifie sa taille.
+   * Supabase (version gratuite) limite les fichiers à 50 Mo.
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileFn: (f: File | null) => void) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const maxSize = 50 * 1024 * 1024; // 50MB
+      const maxSize = 50 * 1024 * 1024; // 50 Mo
       if (selectedFile.size > maxSize) {
         toast({
           title: "Fichier trop volumineux",
           description: "La limite de votre plan Supabase est de 50 Mo. Ce fichier ( " + (selectedFile.size / (1024 * 1024)).toFixed(1) + " Mo) ne pourra pas être envoyé.",
           variant: "destructive",
         });
-        e.target.value = ""; // Clear input
+        e.target.value = ""; // On vide le champ pour forcer un autre choix
         return;
       }
-      setFileFn(selectedFile);
+      
+      // Si c'est une image (et pour la miniature particulièrement), on peut utiliser le cropper
+      if (selectedFile.type.startsWith("image/") && setFileFn === setThumbnail) {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          setCropImageSrc(reader.result?.toString() || "");
+        });
+        reader.readAsDataURL(selectedFile);
+        e.target.value = "";
+      } else {
+        setFileFn(selectedFile);
+      }
     }
   };
 
+  /**
+   * Validation de l'image recadrée
+   */
+  const handleCropSubmit = (croppedBlob: Blob) => {
+    const croppedFile = new File([croppedBlob], `thumbnail-${Date.now()}.jpg`, { type: "image/jpeg" });
+    setThumbnail(croppedFile);
+    setCropImageSrc(null);
+  };
+
+  /**
+   * Fonction qui envoie réellement le fichier dans le "Storage" (stockage) de Supabase.
+   */
   const uploadFile = async (file: File, path: string) => {
+    // Simulation d'une progression visuelle
     const interval = setInterval(() => {
       setProgress((prev) => (prev < 95 ? prev + 5 : prev));
     }, 400);
 
     try {
+      // Envoi du fichier dans le dossier 'media'
       const { data, error } = await supabase.storage.from("media").upload(path, file);
       clearInterval(interval);
       if (error) throw error;
       setProgress(100);
+      // Récupération de l'adresse URL publique du fichier envoyé
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(data.path);
       return urlData.publicUrl;
     } catch (err) {
@@ -69,6 +117,9 @@ const AdminUpload = () => {
     }
   };
 
+  /**
+   * Action déclenchée quand on clique sur "Publier le contenu".
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,20 +129,24 @@ const AdminUpload = () => {
       let fileUrl = "";
       let thumbnailUrl = "";
 
+      // 1. On envoie le fichier principal si il y en a un
       if (file) {
         const ext = file.name.split(".").pop();
         const path = `${type}/${Date.now()}.${ext}`;
         fileUrl = await uploadFile(file, path);
       }
 
+      // 2. On envoie la miniature si il y en a une
       if (thumbnail) {
         const ext = thumbnail.name.split(".").pop();
         const path = `thumbnails/${Date.now()}.${ext}`;
         thumbnailUrl = await uploadFile(thumbnail, path);
       }
 
+      // 3. On récupère l'identifiant de la personne connectée (l'admin)
       const { data: { user } } = await supabase.auth.getUser();
 
+      // 4. On enregistre toutes les infos dans la table "content" de la BDD
       const { error } = await supabase.from("content").insert({
         title,
         description,
@@ -103,11 +158,12 @@ const AdminUpload = () => {
         tags: tags ? tags.split(",").map((t) => t.trim()) : [],
         allow_download: allowDownload,
         created_by: user?.id,
-        is_published: true,
+        is_published: true, // Publié directement par défaut
       });
 
       if (error) throw error;
 
+      // 5. Message de succès et remise à zéro du formulaire
       toast({ title: "Publication réussie !", description: "Votre contenu est maintenant en ligne." });
       setTitle("");
       setDescription("");
@@ -119,10 +175,10 @@ const AdminUpload = () => {
       setProgress(0);
     } catch (err: any) {
       setProgress(0);
-      console.error("Upload error:", err);
+      console.error("Erreur Upload:", err);
       toast({ 
         title: "Échec de l'envoi", 
-        description: err.message || err.error_description || "Une erreur est survenue lors de l'enregistrement.", 
+        description: err.message || "Une erreur est survenue lors de l'enregistrement.", 
         variant: "destructive" 
       });
     } finally {
@@ -130,6 +186,7 @@ const AdminUpload = () => {
     }
   };
 
+  // Filtrage des catégories selon le type de contenu choisi
   const filteredCategories = categories.filter((c) => {
     if (type === "audio") return c.type === "radio";
     if (type === "video") return c.type === "tv";
@@ -139,7 +196,18 @@ const AdminUpload = () => {
   });
 
   return (
+    <>
+    {cropImageSrc && (
+      <ImageCropper 
+        imageSrc={cropImageSrc} 
+        onCropSubmit={handleCropSubmit} 
+        onCancel={() => setCropImageSrc(null)} 
+      />
+    )}
+    
     <form onSubmit={handleSubmit} className="glass-card p-6 max-w-2xl space-y-5">
+      
+      {/* Sélecteur du Type de Contenu */}
       <div>
         <label className="text-sm text-muted-foreground mb-1 block">Type de contenu</label>
         <select
@@ -156,6 +224,7 @@ const AdminUpload = () => {
         </select>
       </div>
 
+      {/* Titre */}
       <div>
         <label className="text-sm text-muted-foreground mb-1 block">Titre</label>
         <input
@@ -168,6 +237,7 @@ const AdminUpload = () => {
         />
       </div>
 
+      {/* Résumé / Description courte */}
       <div>
         <label className="text-sm text-muted-foreground mb-1 block">Description</label>
         <textarea
@@ -179,19 +249,21 @@ const AdminUpload = () => {
         />
       </div>
 
+      {/* Zone de texte longue (Uniquement pour les articles et jobs) */}
       {(type === "article" || type === "job") && (
         <div>
-          <label className="text-sm text-muted-foreground mb-1 block">Contenu de l'article</label>
+          <label className="text-sm text-muted-foreground mb-1 block">Contenu complet</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={8}
             className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-            placeholder="Rédigez votre article ici..."
+            placeholder="Rédigez votre texte ici..."
           />
         </div>
       )}
 
+      {/* Sélection de la Catégorie */}
       <div>
         <label className="text-sm text-muted-foreground mb-1 block">Catégorie</label>
         <select
@@ -206,6 +278,7 @@ const AdminUpload = () => {
         </select>
       </div>
 
+      {/* Tags (Étiquettes) */}
       <div>
         <label className="text-sm text-muted-foreground mb-1 block">Tags (séparés par des virgules)</label>
         <input
@@ -213,10 +286,11 @@ const AdminUpload = () => {
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          placeholder="politique, afrique, sport"
+          placeholder="ex: politique, afrique, direct"
         />
       </div>
 
+      {/* Sélection du Fichier Principal (Audio/Vidéo/Image) */}
       {(type === "audio" || type === "video" || type === "image") && (
         <div className="glass-card p-6">
           <label className="text-sm text-muted-foreground mb-1 block">
@@ -231,6 +305,7 @@ const AdminUpload = () => {
         </div>
       )}
 
+      {/* Option de téléchargement */}
       <div className="flex items-center gap-3 p-4 glass-card bg-primary/5 border-primary/20">
         <input
           type="checkbox"
@@ -244,8 +319,17 @@ const AdminUpload = () => {
         </label>
       </div>
 
+      {/* Miniature (Optionnelle) */}
       <div className="glass-card p-6">
-        <label className="text-sm text-muted-foreground mb-1 block">Miniature <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>
+        <label className="text-sm text-muted-foreground mb-1 block">Image de couverture <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>
+        
+        {thumbnail && (
+          <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border">
+            <img src={URL.createObjectURL(thumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+            <button type="button" onClick={() => setThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black">X</button>
+          </div>
+        )}
+        
         <input
           type="file"
           accept="image/*"
@@ -254,12 +338,13 @@ const AdminUpload = () => {
         />
       </div>
 
+      {/* Barre de progression pendant l'upload */}
       {loading && (
         <div className="space-y-3 bg-primary/5 p-4 rounded-xl border border-primary/20 shadow-inner">
           <div className="flex justify-between text-sm font-semibold text-primary">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              Transfert en cours...
+              Transfert en cours vers le serveur...
             </span>
             <span>{progress}%</span>
           </div>
@@ -268,15 +353,17 @@ const AdminUpload = () => {
         </div>
       )}
 
+      {/* Bouton Final */}
       <button
         type="submit"
         disabled={loading}
         className="btn-primary-glow w-full flex items-center justify-center gap-2 disabled:opacity-50"
       >
         <Upload size={16} />
-        {loading ? "Upload en cours..." : "Publier le contenu"}
+        {loading ? "Chargement..." : "Publier maintenant"}
       </button>
     </form>
+    </>
   );
 };
 

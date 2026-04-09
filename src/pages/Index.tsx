@@ -1,17 +1,22 @@
+// Importation des outils React de base
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import ExternalNewsWidget from "@/components/ExternalNewsWidget";
-import NewsSection from "@/components/NewsSection";
-import JournalistsSection from "@/components/JournalistsSection";
-import TVSection from "@/components/TVSection";
-import RadioSection from "@/components/RadioSection";
-import SportsSection from "@/components/SportsSection";
-import JobsSection from "@/components/JobsSection";
-import AdsWidget from "@/components/AdsWidget";
-import Footer from "@/components/Footer";
+// Importation de tous les composants qui forment les différentes sections de la page d'accueil
+import Navbar from "@/components/Navbar"; // Menu de navigation
+import HeroSection from "@/components/HeroSection"; // Section de bienvenue (Bannière)
+import RecentSection from "@/components/RecentSection"; // Section des dernières actus
+import ExternalNewsWidget from "@/components/ExternalNewsWidget"; // Actualités externes (Radio France, etc.)
+import NewsSection from "@/components/NewsSection"; // Nos actualités (Articles)
+import JournalistsSection from "@/components/JournalistsSection"; // Présentation des journalistes
+import TVSection from "@/components/TVSection"; // Section Vidéo / TV
+import RadioSection from "@/components/RadioSection"; // Section Radio
+import SportsSection from "@/components/SportsSection"; // Section Sports
+import JobsSection from "@/components/JobsSection"; // Section Offres d'emploi
+import AdsWidget from "@/components/AdsWidget"; // Widget publicitaire
+import Footer from "@/components/Footer"; // Pied de page
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
 
+// Définition des interrupteurs pour activer/désactiver des sections
 interface Sections {
   hero: boolean;
   external_news: boolean;
@@ -23,11 +28,13 @@ interface Sections {
   jobs?: boolean;
 }
 
+// Structure pour un titre et un sous-titre de section
 interface SectionTitle {
   title: string;
   subtitle: string;
 }
 
+// Liste de tous les titres de sections modifiables
 interface SectionTitles {
   news: SectionTitle;
   journalists: SectionTitle;
@@ -37,6 +44,7 @@ interface SectionTitles {
   jobs: SectionTitle;
 }
 
+// Titres par défaut (si rien n'est configuré dans la base de données)
 const defaultTitles: SectionTitles = {
   news: { title: "LE MAG AXIS24", subtitle: "Toute l'information décryptée pour vous." },
   sports: { title: "Axis 24 SPORTS", subtitle: "Toute l'actualité sportive en direct." },
@@ -46,7 +54,12 @@ const defaultTitles: SectionTitles = {
   radio: { title: "RADIO AXIS24", subtitle: "Écoutez nos émissions où que vous soyez." },
 };
 
+/**
+ * Composant INDEX (Page d'Accueil).
+ * C'est ici que l'on assemble tous les morceaux du site.
+ */
 const Index = () => {
+  // États pour stocker quelles sections afficher
   const [sections, setSections] = useState<Sections>({
     hero: true,
     external_news: true,
@@ -57,9 +70,13 @@ const Index = () => {
     sports: true,
     jobs: true,
   });
+  
+  // État pour stocker les titres personnalisés
   const [titles, setTitles] = useState<SectionTitles>(defaultTitles);
+  // État pour savoir si on est encore en train de charger les réglages
   const [loadingSettings, setLoadingSettings] = useState(true);
 
+  // Au chargement de la page, on va chercher les réglages dans la base de données
   useEffect(() => {
     const fetchSettings = async () => {
       const { data } = await supabase
@@ -68,17 +85,20 @@ const Index = () => {
         .in("key", ["homepage_sections", "section_titles"]);
       
       if (data) {
+        // On récupère l'interrupteur des sections
         const sectionsData = data.find(d => d.key === "homepage_sections");
         if (sectionsData) setSections(sectionsData.value as unknown as Sections);
         
+        // On récupère les titres personnalisés
         const titlesData = data.find(d => d.key === "section_titles");
         if (titlesData) setTitles({ ...defaultTitles, ...(titlesData.value as unknown as SectionTitles) });
       }
-      setLoadingSettings(false);
+      setLoadingSettings(false); // Chargement terminé
     };
     fetchSettings();
   }, []);
 
+  // Si on charge encore, on affiche un petit rond qui tourne
   if (loadingSettings) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
@@ -92,13 +112,18 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       
-      {/* Spacer for fixed Navbar */}
+      {/* Petit espace vide pour compenser le menu qui est fixé en haut */}
       <div className="h-16" />
 
+      {/* On affiche chaque section SEULEMENT si son interrupteur est sur "vrai" (true) */}
       {sections.hero && <HeroSection />}
+      
+      {/* Ajout des Récents en première ligne juste en dessous de la bannière (toujours actif pour les nouveautés) */}
+      <RecentSection />
       
       {sections.external_news && <ExternalNewsWidget />}
       
+      {/* Widget publicitaire (toujours visible) */}
       <AdsWidget />
       
       {sections.internal_news && <NewsSection title={titles.news.title} subtitle={titles.news.subtitle} />}

@@ -1,10 +1,15 @@
+// Importation des outils React de base
 import { useState, useEffect } from "react";
+// Importation des outils d'animation
 import { motion, AnimatePresence } from "framer-motion";
+// Importation des icônes (Lecture, Horloge, Oeil, Croix, Info, Moniteur)
 import { Play, Clock, Eye, X, Info, MonitorPlay } from "lucide-react";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 
+// Structure d'une Vidéo dans le code
 interface VideoContent {
   id: string;
   title: string;
@@ -14,29 +19,39 @@ interface VideoContent {
   is_live: boolean;
   views_count: number;
   created_at: string;
-  categories?: { name: string } | null;
+  categories?: { name: string } | null; // Nom de la catégorie associée
 }
 
+// Paramètres personnalisables
 interface Props {
   title?: string;
   subtitle?: string;
 }
 
+/**
+ * Composant TV SECTION (Section Télévision).
+ * Permet de regarder les replays et les émissions en vidéo.
+ */
 const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes nos émissions et reportages en vidéo." }: Props) => {
+  // États pour stocker les vidéos, le chargement, et la vidéo en cours de lecture
   const [replays, setReplays] = useState<VideoContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("Tous");
   const { t } = useLanguage();
 
+  /**
+   * Fonction qui récupère les vidéos depuis la base de données.
+   */
   useEffect(() => {
     const fetchVideos = async () => {
       const { data } = await supabase
         .from("content")
         .select("*, categories(name)")
-        .eq("type", "video")
-        .eq("is_published", true)
+        .eq("type", "video") // Uniquement les contenus de type "video"
+        .eq("is_published", true) // Uniquement ceux qui sont publiés
         .order("created_at", { ascending: false });
+      
       if (data) {
         setReplays(data as unknown as VideoContent[]);
       }
@@ -45,8 +60,10 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
     fetchVideos();
   }, []);
 
+  // Liste des catégories pour le filtrage
   const categories = ["Tous", ...Array.from(new Set(replays.map(r => r.categories?.name || "Général")))];
 
+  // Filtrage des vidéos selon la catégorie sélectionnée
   const filteredVideos = activeTab === "Tous" 
     ? replays 
     : replays.filter(r => (r.categories?.name || "Général") === activeTab);
@@ -54,6 +71,8 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
   return (
     <section id="television" className="py-12 bg-muted/10">
       <div className="container mx-auto px-4">
+        
+        {/* --- EN-TÊTE DE LA SECTION --- */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -69,7 +88,7 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
           <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t(subtitle)}</p>
         </motion.div>
 
-        {/* Categories Tabs */}
+        {/* --- ONGLETS DE CATÉGORIES (Vidéos) --- */}
         {categories.length > 1 && (
           <div className="flex flex-wrap justify-center gap-2 mb-12">
             {categories.map((cat) => (
@@ -88,7 +107,9 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
           </div>
         )}
 
+        {/* --- GRILLE DES VIDÉOS --- */}
         {loading ? (
+          // Affichage du chargement
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
               <div key={i} className="aspect-video rounded-2xl bg-muted animate-pulse" />
@@ -113,7 +134,9 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
                   transition={{ delay: i * 0.05 }}
                   className="glass-card overflow-hidden group hover:border-secondary/30 transition-all flex flex-col"
                 >
+                  {/* --- LECTEUR VIDÉO --- */}
                   <div className="aspect-video bg-black flex items-center justify-center relative overflow-hidden">
+                    {/* Si on a cliqué sur lecture, on affiche la vidéo, sinon l'image d'aperçu */}
                     {playingId === replay.id ? (
                       <div className="relative w-full h-full group/player">
                         <video 
@@ -122,6 +145,7 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
                           autoPlay 
                           className="w-full h-full object-contain"
                         />
+                        {/* Bouton pour fermer la lecture et revenir à l'aperçu */}
                         <button 
                           onClick={(e) => { e.stopPropagation(); setPlayingId(null); }}
                           className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-secondary hover:text-white text-foreground rounded-full transition-all z-20 shadow-lg"
@@ -131,6 +155,7 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
                       </div>
                     ) : (
                       <>
+                        {/* Image d'aperçu (Thumbnail) */}
                         {replay.thumbnail_url ? (
                           <img src={replay.thumbnail_url} alt={replay.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                         ) : (
@@ -138,6 +163,7 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
                             <Play size={48} className="text-muted-foreground/30" />
                           </div>
                         )}
+                        {/* Bouton Play au survol */}
                         <div 
                           className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all flex items-center justify-center cursor-pointer"
                           onClick={() => setPlayingId(replay.id)}
@@ -150,10 +176,12 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
                     )}
                   </div>
                   
+                  {/* --- INFORMATIONS VIDÉO --- */}
                   <div className="p-5 flex-1 flex flex-col">
                     <h4 className="font-normal tracking-wide text-foreground line-clamp-1 group-hover:text-secondary transition-colors text-lg mb-2">{replay.title}</h4>
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-4 flex-1">{replay.description}</p>
                     
+                    {/* Statistiques (Vues et Date) */}
                     <div className="flex items-center justify-between pt-4 border-t border-border/40">
                       <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
                         <span className="flex items-center gap-1.5">

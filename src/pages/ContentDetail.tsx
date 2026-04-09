@@ -1,12 +1,20 @@
+// Importation des outils de React pour les effets et les états
 import { useEffect, useState } from "react";
+// Importation des outils de navigation pour récupérer l'ID dans l'URL (params)
 import { useParams, useNavigate } from "react-router-dom";
+// Importation de la connexion à Supabase
 import { supabase } from "@/integrations/supabase/client";
+// Importation de Framer Motion pour les animations de page
 import { motion } from "framer-motion";
+// Importation des icônes d'interface
 import { Calendar, Eye, ArrowLeft, Download, Headphones, Play, Share2 } from "lucide-react";
+// Importation des composants globaux (Barre de navigation et Pied de page)
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+// Importation de l'outil de notification (Toast)
 import { useToast } from "@/hooks/use-toast";
 
+/** Structure d'un contenu récupéré en base de données */
 interface Content {
   id: string;
   title: string;
@@ -21,17 +29,26 @@ interface Content {
   categories: { name: string } | null;
 }
 
+/**
+ * Composant CONTENT DETAIL (Page de lecture).
+ * Affiche un article complet, une vidéo ou un podcast audio.
+ */
 const ContentDetail = () => {
+  // On récupère l'identifiant (id) du contenu depuis l'adresse URL
   const { id } = useParams();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  /**
+   * Récupère les données du contenu et augmente le compteur de vues.
+   */
   useEffect(() => {
     const fetchContent = async () => {
       if (!id) return;
       
+      // 1. Récupération des informations sur le contenu (et le nom de sa catégorie)
       const { data, error } = await supabase
         .from("content")
         .select("*, categories(name)")
@@ -40,7 +57,7 @@ const ContentDetail = () => {
       
       if (data) {
         setContent(data as unknown as Content);
-        // Increment views
+        // 2. Mise à jour automatique du nombre de vues dans la base de données
         await supabase.from("content").update({ views_count: (data.views_count || 0) + 1 }).eq("id", id);
       }
       setLoading(false);
@@ -48,132 +65,155 @@ const ContentDetail = () => {
     fetchContent();
   }, [id]);
 
+  /**
+   * Copie l'adresse de la page dans le presse-papier pour partage.
+   */
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({ title: "Lien copié !", description: "Vous pouvez maintenant le partager." });
   };
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground uppercase tracking-widest">Chargement...</div>;
-  if (!content) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Contenu non trouvé.</div>;
+  // Affichage pendant le chargement
+  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground uppercase tracking-widest bg-white dark:bg-background">Chargement du contenu...</div>;
+  
+  // Cas où le contenu n'existe pas en BDD
+  if (!content) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Oups, ce contenu n'existe plus.</div>;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-32">
+      <main className="container mx-auto px-4 py-32 max-w-7xl animate-in fade-in duration-700">
+        
+        {/* Bouton retour avec animation */}
         <motion.button
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-12 group"
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-all mb-12 group uppercase text-xs font-bold tracking-widest"
         >
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-          Retour
+          Revenir en arrière
         </motion.button>
 
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
+          {/* --- EN-TÊTE DU CONTENU --- */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6 mb-12"
           >
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-widest text-primary">
-              <span className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                {content.categories?.name || "Général"}
+            {/* Badges : Catégorie, Date et Vues */}
+            <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <span className="bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-sm">
+                {content.categories?.name || "Actualité"}
               </span>
-              <span className="text-muted-foreground flex items-center gap-1.5">
+              <span className="text-muted-foreground flex items-center gap-1.5 bg-muted/30 px-3 py-1 rounded-full">
                 <Calendar size={14} /> {new Date(content.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
               </span>
-              <span className="text-muted-foreground flex items-center gap-1.5 font-normal tracking-normal capitalize">
-                • {content.views_count} vues
+              <span className="text-muted-foreground flex items-center gap-1.5 font-normal tracking-normal capitalize bg-muted/10 px-3 py-1 rounded-full">
+                • {content.views_count.toLocaleString()} lectures
               </span>
             </div>
             
-            <h1 className="font-display text-4xl md:text-6xl text-foreground leading-[1.1] tracking-tight">
+            {/* Le Titre principal */}
+            <h1 className="font-display text-4xl md:text-7xl text-foreground font-extrabold leading-[1.05] tracking-tight drop-shadow-sm break-words max-w-full overflow-hidden">
               {content.title}
             </h1>
             
-            <p className="text-xl text-muted-foreground leading-relaxed italic border-l-4 border-primary/30 pl-6">
+            {/* Le Sapeau (introduction) */}
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed italic border-l-4 border-primary/40 pl-8 py-2 font-light break-words max-w-full">
               {content.description}
             </p>
           </motion.div>
 
-          {/* Media Player / Main Image */}
+          {/* --- LECTEUR MÉDIA / IMAGE PRINCIPALE --- */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="relative rounded-2xl overflow-hidden glass-card shadow-2xl mb-16 aspect-video bg-muted border-primary/10"
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="relative rounded-[2rem] overflow-hidden glass-card shadow-2xl mb-16 aspect-video bg-muted border border-border shadow-primary/5"
           >
+            {/* Si c'est une vidéo */}
             {content.type === "video" && content.file_url ? (
-              <video src={content.file_url} controls className="w-full h-full object-contain bg-black" />
-            ) : content.type === "audio" && content.file_url ? (
-              <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-muted/50 to-background">
-                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mb-8 animate-pulse text-primary">
-                  <Headphones size={48} />
+              <video src={content.file_url} controls className="w-full h-full object-contain bg-black rounded-[2rem]" />
+            ) : 
+            /* Si c'est un audio (Podcast) */
+            content.type === "audio" && content.file_url ? (
+              <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+                <div className="w-28 h-28 rounded-full bg-primary/20 flex items-center justify-center mb-10 animate-pulse text-primary shadow-inner">
+                  <Headphones size={56} />
                 </div>
-                <audio src={content.file_url} controls className="w-full max-w-md" />
+                <audio src={content.file_url} controls className="w-full max-w-md shadow-xl rounded-full" />
+                <p className="mt-6 text-sm text-primary font-bold uppercase tracking-[0.3em] opacity-60">Audio en cours de lecture</p>
               </div>
-            ) : content.thumbnail_url || (content.type === "image" && content.file_url) ? (
+            ) : 
+            /* Si c'est une image ou contient une miniature */
+            content.thumbnail_url || (content.type === "image" && content.file_url) ? (
               <img 
                 src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
                 alt={content.title} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground font-display text-2xl uppercase tracking-widest opacity-20">
+            ) : 
+            /* Par défaut (Logo Axis24) */
+            (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground font-display text-2xl uppercase tracking-[0.5em] opacity-20">
                 AXIS24 MEDIA
               </div>
             )}
           </motion.div>
 
-          {/* Content Body */}
-          <div className="grid lg:grid-cols-[1fr,200px] gap-16">
+          {/* --- CORPS DE L'ARTICLE ET ACTIONS --- */}
+          <div className="grid lg:grid-cols-[1fr,240px] gap-16">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="prose prose-invert prose-primary max-w-none"
+              className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed"
             >
-              <div className="space-y-8 text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                {content.body || "Aucun contenu textuel supplémentaire."}
+              <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap font-serif break-words max-w-full overflow-hidden [word-break:break-word]">
+                {content.body || "Pas de texte supplémentaire pour cet élément."}
               </div>
             </motion.div>
 
-            {/* Sidebar Actions */}
+            {/* Menu d'actions latéral */}
             <motion.aside
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
-              className="space-y-8 h-fit lg:sticky lg:top-32"
+              className="space-y-10 h-fit lg:sticky lg:top-36"
             >
               <div className="space-y-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Actions</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-6 border-b border-border pb-2">Partage & Actions</p>
+                
+                {/* Bouton Partager */}
                 <button 
                   onClick={handleShare}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl border border-border hover:bg-muted hover:border-primary/30 transition-all group"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-5 rounded-2xl border border-border bg-white dark:bg-card hover:bg-muted hover:border-primary/20 transition-all group shadow-sm"
                 >
                   <Share2 size={18} className="text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-semibold">Partager</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Partager l'URL</span>
                 </button>
 
+                {/* Bouton Télécharger (si autorisé) */}
                 {content.allow_download && content.file_url && (
                   <a 
                     href={content.file_url} 
                     download 
-                    className="w-full btn-primary-glow flex items-center justify-center gap-3 px-6 py-4 rounded-xl shadow-lg shadow-primary/20"
+                    className="w-full btn-primary-glow flex items-center justify-center gap-3 px-6 py-5 rounded-2xl shadow-xl shadow-primary/20 font-bold uppercase tracking-widest text-xs transition-all hover:scale-[1.02]"
                   >
                     <Download size={18} />
-                    <span className="text-sm font-bold">Télécharger</span>
+                    <span>Télécharger</span>
                   </a>
                 )}
               </div>
 
-              <div className="p-6 rounded-2xl bg-muted/30 border border-border/50">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Publicité</p>
-                <div className="aspect-square bg-muted rounded-lg flex items-center justify-center text-[10px] text-muted-foreground uppercase text-center p-4">
-                  Votre espace publicité ici
+              {/* Petit encart Publicitaire */}
+              <div className="p-6 rounded-[2rem] bg-muted/40 border border-border/50 shadow-inner">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-4 opacity-70">Publicité Partenaire</p>
+                <div className="aspect-square bg-background/50 rounded-2xl flex items-center justify-center text-[9px] text-muted-foreground uppercase text-center p-6 italic leading-relaxed border border-dashed border-border group hover:border-primary/20 transition-colors">
+                  Espace publicitaire <br /> réservé à nos partenaires
                 </div>
               </div>
             </motion.aside>

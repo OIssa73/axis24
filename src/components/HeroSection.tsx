@@ -1,9 +1,15 @@
+// Importation des outils d'animation et des icônes
 import { motion } from "framer-motion";
 import { Radio, Tv, Images, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
+// Importation de l'image de fond du studio
 import heroBg from "@/assets/hero-bg.jpg";
 
+/**
+ * Composant HERO (Bannière d'accueil).
+ * C'est la première chose que l'on voit en arrivant sur le site.
+ */
 const HeroSection = () => {
   const { t } = useLanguage();
 
@@ -12,18 +18,21 @@ const HeroSection = () => {
       id="accueil"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background */}
+      {/* --- IMAGE DE FOND --- */}
       <div className="absolute inset-0">
         <img
           src={heroBg}
           alt="Studio AXIS24"
           className="w-full h-full object-cover"
-          loading="eager"
+          loading="eager" // Chargement prioritaire pour éviter un écran blanc
         />
+        {/* Voile sombre sur l'image pour que le texte reste lisible */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
       </div>
 
+      {/* --- CONTENU CENTRAL --- */}
       <div className="relative z-10 container mx-auto px-4 text-center">
+        {/* Titre animé ("AXIS24 MEDIA GROUPE") */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -40,6 +49,7 @@ const HeroSection = () => {
           </p>
         </motion.div>
 
+        {/* Boutons d'accès rapide (Radio, TV, Images) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,6 +79,7 @@ const HeroSection = () => {
           </Link>
         </motion.div>
 
+        {/* Petite flèche animée qui invite à défiler vers le bas */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

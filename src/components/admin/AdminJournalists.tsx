@@ -1,10 +1,17 @@
+// Importation des outils de React pour gérer les formulaires et les effets
 import { useState, useEffect } from "react";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
+// Importation des icônes d'action (Plus, Supprimer, Upload, Utilisateur, Loader, Modifier)
 import { Plus, Trash2, Upload, User, Loader2, Edit2 } from "lucide-react";
+// Importation de l'outil de notification (Toast)
 import { useToast } from "@/hooks/use-toast";
+// Importation du composant de barre de progression
 import { Progress } from "@/components/ui/progress";
+// Importation du recadreur d'image (pour avoir des photos de profil propres)
 import ImageCropper from "./ImageCropper";
 
+// Structure d'un Journaliste dans le code
 interface Journalist {
   id: string;
   name: string;
@@ -13,22 +20,33 @@ interface Journalist {
   created_at: string;
 }
 
+/**
+ * Composant ADMIN JOURNALISTS (Gestion de l'équipe).
+ * Permet d'ajouter des membres à l'équipe Axis24 avec photo et bio.
+ */
 const AdminJournalists = () => {
+  // --- ÉTATS ---
   const [journalists, setJournalists] = useState<Journalist[]>([]);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null); // Photo recadrée prête à être envoyée
+  const [editingId, setEditingId] = useState<string | null>(null); // ID si on est en mode modification
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Source de l'image à recadrer
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
+  /**
+   * Récupère la liste des journalistes et leurs biographies.
+   * Note : Les bios sont stockées dans 'site_settings' pour plus de flexibilité.
+   */
   const fetchJournalists = async () => {
     try {
+      // 1. On récupère les journalistes (Nom + Photo)
       const { data: journalistsData, error: jError } = await supabase.from("journalists").select("*").order("created_at", { ascending: false });
       if (jError) throw jError;
       
+      // 2. On récupère les bios dans les réglages du site
       const { data: settingsData } = await supabase
         .from("site_settings")
         .select("value")
@@ -38,43 +56,57 @@ const AdminJournalists = () => {
       const bios = (settingsData?.value || {}) as Record<string, string>;
 
       if (journalistsData) {
+        // 3. On fusionne les infos pour chaque journaliste
         const merged = journalistsData.map(j => ({
           ...j,
           bio: bios[j.id] || ""
         }));
         setJournalists(merged as Journalist[]);
       }
-    } catch (error: unknown) {
-      const err = error as Error;
-      toast({ title: "Erreur de chargement", description: err.message, variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Erreur de chargement", description: error.message, variant: "destructive" });
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  /**
+   * Chargement initial.
+   */
   useEffect(() => { fetchJournalists(); }, []);
 
+  /**
+   * Déclenché quand l'utilisateur choisit une photo. 
+   * Ouvre l'outil de recadrage au lieu de l'envoyer directement.
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener("load", () => {
-        setCropImageSrc(reader.result?.toString() || "");
+        setCropImageSrc(reader.result?.toString() || ""); // On passe l'image au recadreur
       });
       reader.readAsDataURL(e.target.files[0]);
-      e.target.value = ""; // Reset input
+      e.target.value = ""; // Reset de l'input pour pouvoir choisir la même image plus tard
     }
   };
 
+  /**
+   * Reçoit l'image une fois qu'elle a été recadrée.
+   */
   const handleCropSubmit = (croppedBlob: Blob) => {
     const croppedFile = new File([croppedBlob], `cropped-${Date.now()}.jpg`, { type: "image/jpeg" });
-    setFile(croppedFile);
-    setCropImageSrc(null);
+    setFile(croppedFile); // Le fichier est maintenant prêt pour l'upload
+    setCropImageSrc(null); // On ferme le recadreur
   };
 
+  /**
+   * Enregistre le journaliste (Création ou Modification).
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
+    
+    // Si c'est un nouveau, la photo est obligatoire
     if (!editingId && !file) {
-      toast({ title: "Fichier manquant", description: "Veuillez fournir une image", variant: "destructive" });
+      toast({ title: "Photo manquante", description: "Veuillez choisir une photo pour le journaliste.", variant: "destructive" });
       return;
     }
 
@@ -84,6 +116,7 @@ const AdminJournalists = () => {
     try {
       let publicUrl = editingId ? journalists.find(j => j.id === editingId)?.image_url : "";
 
+      // 1. Si une nouvelle photo a été choisie, on l'envoie sur le serveur
       if (file) {
         const fileExt = file.name.split('.').pop();
         const filePath = `journalists/${Math.random()}.${fileExt}`;
@@ -99,6 +132,7 @@ const AdminJournalists = () => {
         publicUrl = data.publicUrl;
       }
 
+      // 2. Mise à jour ou insertion dans la table 'journalists'
       let newId = editingId;
       if (editingId) {
         const { error } = await supabase.from("journalists").update({
@@ -115,7 +149,7 @@ const AdminJournalists = () => {
         newId = data.id;
       }
 
-      // Update Bios in site_settings
+      // 3. Mise à jour de la biographie dans 'site_settings'
       const { data: settingsData } = await supabase
         .from("site_settings")
         .select("value")
@@ -127,25 +161,18 @@ const AdminJournalists = () => {
 
       await supabase
         .from("site_settings")
-        .upsert({ key: "journalists_bios", value: updatedBios as Record<string, unknown> });
+        .upsert({ key: "journalists_bios", value: updatedBios as any });
 
       toast({ 
-        title: editingId ? "Journaliste modifié" : "Journaliste ajouté", 
-        description: editingId ? "Les informations sont à jour." : `${name} fait maintenant partie de l'équipe.` 
+        title: editingId ? "Journaliste modifié" : "Journaliste ajouté !", 
+        description: editingId ? "Les modifications ont été prises en compte." : `${name} a rejoint l'équipe.` 
       });
 
-      setName("");
-      setBio("");
-      setFile(null);
-      setEditingId(null);
+      // 4. Nettoyage du formulaire
+      cancelEdit();
       fetchJournalists();
-    } catch (error: unknown) {
-      const err = error as Error;
-      toast({ 
-        title: "Erreur", 
-        description: err.message || (typeof err === 'string' ? err : "Erreur inconnue lors de l'enregistrement"), 
-        variant: "destructive" 
-      });
+    } catch (error: any) {
+      toast({ title: "Erreur", description: error.message || "Une erreur est survenue.", variant: "destructive" });
     } finally {
       setProgress(100);
       setTimeout(() => {
@@ -155,31 +182,33 @@ const AdminJournalists = () => {
     }
   };
 
+  /**
+   * Retire un journaliste de l'équipe.
+   */
   const deleteJournalist = async (id: string) => {
+    if (!confirm("Supprimer ce journaliste de l'équipe ?")) return;
     try {
       const { error } = await supabase.from("journalists").delete().eq("id", id);
       if (error) throw error;
       
-      // Clean up Bio in site_settings
-      const { data: settingsData } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "journalists_bios")
-        .maybeSingle();
-      
+      // On retire aussi sa bio
+      const { data: settingsData } = await supabase.from("site_settings").select("value").eq("key", "journalists_bios").maybeSingle();
       if (settingsData?.value) {
         const bios = settingsData.value as Record<string, string>;
         delete bios[id];
-        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as Record<string, unknown> });
+        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as any });
       }
 
-      toast({ title: "Supprimé", description: "Le journaliste a été retiré de l'équipe." });
+      toast({ title: "Journaliste retiré", description: "L'équipe a été mise à jour." });
       fetchJournalists();
-    } catch (error: unknown) {
-      toast({ title: "Erreur", description: error instanceof Error ? error.message : "Erreur", variant: "destructive" });
+    } catch (error: any) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
     }
   };
 
+  /**
+   * Active le mode modification pour un journaliste précis.
+   */
   const startEdit = (j: Journalist) => {
     setName(j.name);
     setBio(j.bio || "");
@@ -197,6 +226,8 @@ const AdminJournalists = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      
+      {/* Fenêtre de recadrage d'image (apparaît si on choisit un fichier) */}
       {cropImageSrc && (
         <ImageCropper 
           imageSrc={cropImageSrc} 
@@ -205,15 +236,17 @@ const AdminJournalists = () => {
         />
       )}
       
+      {/* --- FORMULAIRE --- */}
       <div className="glass-card p-6 bg-white shadow-xl shadow-black/5 dark:bg-card">
         <h3 className="text-xl font-display uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
-          <User size={20} /> {editingId ? "Modifier le Journaliste" : "Ajouter un Journaliste"}
+          <User size={20} /> {editingId ? "Modifier les informations" : "Ajouter un nouveau membre"}
         </h3>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
+            {/* Nom */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Nom complet</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Nom et Prénom</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                 <input
@@ -227,20 +260,23 @@ const AdminJournalists = () => {
               </div>
             </div>
 
+            {/* Bio */}
             <div className="space-y-2 md:col-span-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Bio / Description (optionnel)</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Biographie / Poste occupé</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Rédacteur en chef..."
+                placeholder="Ex: Rédacteur en chef, expert en géopolitique..."
                 rows={3}
                 className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none"
               />
             </div>
 
+            {/* Photo */}
             <div className="space-y-2 md:col-span-2">
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-                Photo de profil (Format 3:4) {editingId && <span className="text-secondary ml-2 lowercase font-normal">(laisser vide pour conserver l'actuelle)</span>}
+                Photo de profil (Format 3:4 recommandé) 
+                {editingId && <span className="text-secondary ml-2 lowercase font-normal italic">(Laissez vide pour garder l'ancienne photo)</span>}
               </label>
               <div className="relative border-2 border-dashed border-border/50 rounded-xl p-3 hover:border-primary/50 transition-all group min-h-[50px] flex items-center justify-center">
                 <input
@@ -251,16 +287,17 @@ const AdminJournalists = () => {
                 />
                 <div className="flex items-center gap-3 text-muted-foreground group-hover:text-primary transition-colors">
                   <Upload size={18} />
-                  <span className="text-sm font-medium truncate max-w-[200px]">{file ? file.name : "Choisir et recadrer une image"}</span>
+                  <span className="text-sm font-medium truncate max-w-[200px]">{file ? "Photo sélectionnée" : "Choisir et recadrer une photo"}</span>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Barre de progression pendant l'envoi */}
           {uploading && (
             <div className="space-y-2">
               <Progress value={progress} className="h-1.5" />
-              <p className="text-[10px] text-center text-muted-foreground animate-pulse tracking-widest uppercase">Téléversement en cours...</p>
+              <p className="text-[10px] text-center text-muted-foreground animate-pulse tracking-widest uppercase">Synchronisation avec le serveur...</p>
             </div>
           )}
 
@@ -280,12 +317,13 @@ const AdminJournalists = () => {
               className="flex-1 btn-primary-glow h-14 rounded-xl font-bold uppercase tracking-widest flex items-center justify-center gap-3 disabled:opacity-50 text-white shadow-lg"
             >
               {uploading ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}
-              {editingId ? "Enregistrer" : "Ajouter à l'équipe"}
+              {editingId ? "Mettre à jour" : "Valider l'inscription"}
             </button>
           </div>
         </form>
       </div>
 
+      {/* --- LISTE DES JOURNALISTES ACTUELS --- */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {journalists.map((j) => (
           <div key={j.id} className="glass-card p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-white dark:bg-card">
@@ -294,7 +332,7 @@ const AdminJournalists = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="font-normal tracking-wide text-foreground truncate">{j.name}</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">Équipe Axis24</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">Équipe de rédaction Axis24</p>
             </div>
             <div className="flex gap-1">
               <button
@@ -307,7 +345,7 @@ const AdminJournalists = () => {
               <button
                 onClick={() => deleteJournalist(j.id)}
                 className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                title="Supprimer"
+                title="Supprimer de l'équipe"
               >
                 <Trash2 size={16} />
               </button>
@@ -315,11 +353,11 @@ const AdminJournalists = () => {
           </div>
         ))}
         
+        {/* Affichage si l'équipe est vide */}
         {journalists.length === 0 && !uploading && (
-          <div className="col-span-full py-20 text-center text-muted-foreground glass-card border-dashed bg-muted/5">
+          <div className="col-span-full py-20 text-center text-muted-foreground glass-card border-dashed bg-muted/5 opacity-60">
             <User className="mx-auto mb-4 opacity-20" size={48} />
-            <p className="text-sm uppercase tracking-widest font-medium">Aucun journaliste enregistré</p>
-            <p className="text-xs opacity-60 mt-1">Utilisez le formulaire ci-dessus pour commencer.</p>
+            <p className="text-sm uppercase tracking-widest font-medium italic">Aucun journaliste enregistré pour le moment.</p>
           </div>
         )}
       </div>

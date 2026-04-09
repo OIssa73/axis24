@@ -1,9 +1,15 @@
+// Importation des outils React pour gérer les états et les effets
 import { useState, useEffect } from "react";
+// Importation de Framer Motion pour les animations fluides et les fenêtres modales
 import { motion, AnimatePresence } from "framer-motion";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
+// Importation des icônes (Utilisateurs, Flèche, Fermeture)
 import { Users, ChevronRight, X } from "lucide-react";
+// Importation de l'outil de traduction
 import { useLanguage } from "@/context/LanguageContext";
 
+/** Structure d'un journaliste dans le code */
 interface Journalist {
   id: string;
   name: string;
@@ -11,20 +17,32 @@ interface Journalist {
   bio?: string;
 }
 
+/** Propriétés du composant */
 interface Props {
   title?: string;
   subtitle?: string;
 }
 
+/**
+ * Composant JOURNALISTS SECTION.
+ * Affiche les visages de la rédaction sous forme de liste défilante horizontale.
+ * Un clic sur un journaliste ouvre sa biographie détaillée.
+ */
 const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visages vous accompagnent dans le choix de l'information." }: Props) => {
-  const [journalists, setJournalists] = useState<Journalist[]>([]);
-  const [selected, setSelected] = useState<Journalist | null>(null);
+  // --- ÉTATS ---
+  const [journalists, setJournalists] = useState<Journalist[]>([]); // Liste des journalistes
+  const [selected, setSelected] = useState<Journalist | null>(null); // Journaliste sélectionné pour la modale
   const { t } = useLanguage();
 
+  /**
+   * Récupère les données des journalistes et leurs biographies.
+   */
   useEffect(() => {
     const fetchJournalistsData = async () => {
+      // 1. Récupération de la liste de base
       const { data: journalistsData } = await supabase.from("journalists").select("*").order("created_at", { ascending: false });
       
+      // 2. Récupération des biographies (stockées dans les réglages du site)
       const { data: settingsData } = await supabase
         .from("site_settings")
         .select("value")
@@ -34,6 +52,7 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
       const bios = (settingsData?.value || {}) as Record<string, string>;
 
       if (journalistsData) {
+        // 3. Fusion des données : on injecte la bio correspondante à chaque journaliste
         const merged = journalistsData.map(j => ({
           ...j,
           bio: bios[j.id] || ""
@@ -44,11 +63,13 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
     fetchJournalistsData();
   }, []);
 
+  // Si aucun journaliste n'est configuré, on n'affiche rien
   if (journalists.length === 0) return null;
 
   return (
     <section className="py-12 bg-background overflow-hidden" id="journalists">
       <div className="container mx-auto px-4">
+        {/* --- EN-TÊTE DE SECTION --- */}
         <div className="flex items-end justify-between mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
@@ -56,11 +77,13 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
             </div>
             <h2 className="section-heading text-foreground uppercase">{t(title)}</h2>
           </div>
+          {/* Message d'aide au défilement (uniquement sur PC) */}
           <div className="hidden sm:flex items-center gap-2 text-muted-foreground/50 italic text-xs">
             {t("Faites défiler pour voir toute l'équipe")} <ChevronRight size={14} />
           </div>
         </div>
 
+        {/* --- ZONE DE DÉFILEMENT HORIZONTAL (CARROUSEL) --- */}
         <div className="relative">
           <div className="flex gap-8 overflow-x-auto pb-8 snap-x no-scrollbar">
             {journalists.map((j) => (
@@ -70,15 +93,17 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 className="flex-none w-64 snap-center group cursor-pointer"
-                onClick={() => setSelected(j)}
+                onClick={() => setSelected(j)} // Ouvre la biographie au clic
               >
+                {/* Carte individuelle */}
                 <div className="relative aspect-[3/4] rounded-3xl overflow-hidden mb-4 border border-border/50 group-hover:border-primary/50 transition-all duration-500 shadow-lg group-hover:shadow-primary/10">
                   <img 
                     src={j.image_url} 
                     alt={j.name} 
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" 
                   />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end h-1/2">
+                  {/* Nom du journaliste visible au survol */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent p-6 flex flex-col justify-end h-1/2">
                     <p className="text-white font-display text-lg tracking-wide transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                       {j.name}
                     </p>
@@ -91,50 +116,56 @@ const JournalistsSection = ({ title = "NOS JOURNALISTES", subtitle = "Ces visage
             ))}
           </div>
           
+          {/* Effets de fondu sur les côtés du défilement */}
           <div className="absolute left-0 top-0 bottom-8 w-12 bg-gradient-to-r from-background to-transparent pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-8 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" />
         </div>
       </div>
 
+      {/* --- FENÊTRE MODALE (BIOGRAPHIE DÉTAILLÉE) --- */}
       <AnimatePresence>
         {selected && (
           <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-            onClick={() => setSelected(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={() => setSelected(null)} // Ferme la modale si on clique à côté
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-w-2xl w-full bg-background rounded-3xl overflow-hidden shadow-2xl border border-border"
+              onClick={(e) => e.stopPropagation()} // Empêche la fermeture si on clique à l'intérieur
+              className="relative max-w-2xl w-full bg-background rounded-[2rem] overflow-hidden shadow-2xl border border-white/10"
             >
+              {/* Bouton Fermer */}
               <button 
                 onClick={() => setSelected(null)} 
-                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black text-white rounded-full z-10 transition-colors"
+                className="absolute top-6 right-6 p-2 bg-black/40 hover:bg-primary text-white rounded-full z-20 transition-all scale-100 active:scale-90"
                 aria-label="Fermer"
               >
                 <X size={20} />
               </button>
-              <div className="flex flex-col relative w-full h-[85vh] max-h-[850px] overflow-hidden bg-black">
+
+              <div className="flex flex-col relative w-full h-[80vh] max-h-[800px] overflow-hidden bg-black">
+                {/* Grande Image du journaliste */}
                 <img 
                   src={selected.image_url} 
                   alt={selected.name} 
-                  className="w-full h-full object-cover object-top" 
+                  className="w-full h-full object-cover object-top opacity-80" 
                 />
                 
-                {/* Dégradé sombre pour faire ressortir le texte blanc en dessous */}
-                <div className="absolute inset-0 top-1/3 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
+                {/* Dégradé pour le texte */}
+                <div className="absolute inset-0 top-1/2 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none" />
                 
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col justify-end z-10">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-foreground leading-tight uppercase">
+                {/* Contenu textuel */}
+                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 flex flex-col justify-end z-10">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-display text-white leading-tight uppercase font-bold tracking-tighter">
                     {selected.name}
                   </h2>
-                  <p className="text-primary font-bold uppercase tracking-[0.3em] mt-2 text-sm">
-                    Journaliste Axis24
+                  <p className="text-primary font-bold uppercase tracking-[0.4em] mt-3 mb-6 text-sm">
+                    La Voix d'Axis24
                   </p>
-                  <p className="text-white/90 whitespace-pre-line leading-relaxed text-sm md:text-base drop-shadow-md">
-                    {selected.bio || "Membre incontournable de l'équipe rédactionnelle d'Axis24 Media Groupe. Apporte son expertise et son regard aiguisé sur l'actualité en continu."}
+                  <p className="text-white/80 whitespace-pre-line leading-relaxed text-sm md:text-lg italic font-light drop-shadow-md border-l-2 border-primary/40 pl-6">
+                    {selected.bio || "Journaliste passionné et rigoureux, membre incontournable de l'équipe rédactionnelle d'Axis24 Media Groupe. Apporte son expertise et son regard aiguisé sur l'actualité en continu."}
                   </p>
                 </div>
               </div>

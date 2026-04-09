@@ -1,47 +1,69 @@
+// Importation des outils de React pour gérer les formulaires et les effets
 import { useState, useEffect } from "react";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
+// Importation de l'outil de notification (Toast)
 import { useToast } from "@/hooks/use-toast";
+// Importation des icônes d'action (Enregistrer, Fermer, Charger)
 import { Save, X, Upload } from "lucide-react";
+// Importation du composant de barre de progression
 import { Progress } from "@/components/ui/progress";
+// Importation de l'outil de recadrage d'image
+import ImageCropper from "./ImageCropper";
 
+// Structure d'une Catégorie
 interface Category {
   id: string;
   name: string;
   type: string;
 }
 
+// Paramètres reçus par le composant
 interface AdminEditFormProps {
-  contentId: string;
-  onCancel: () => void;
-  onSuccess: () => void;
+  contentId: string; // ID du contenu à modifier
+  onCancel: () => void; // Fonction pour annuler
+  onSuccess: () => void; // Fonction en cas de succès
 }
 
+/**
+ * Composant ADMIN EDIT FORM (Formulaire de modification).
+ * Permet de changer le titre, la catégorie ou les fichiers d'un contenu déjà existant.
+ */
 const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) => {
+  // --- ÉTATS DES DONNÉES (Champs du formulaire) ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"audio" | "video" | "article" | "image" | "job" | "sport">("audio");
   const [categoryId, setCategoryId] = useState("");
   const [tags, setTags] = useState("");
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState(""); // Texte long
   const [allowDownload, setAllowDownload] = useState(true);
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
-  const [fileUrl, setFileUrl] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState(""); // URL de l'image actuelle
+  const [fileUrl, setFileUrl] = useState(""); // URL du fichier actuel
   
+  // --- ÉTATS POUR LES NOUVEAUX FICHIERS (Si l'utilisateur veut remplacer l'ancien) ---
   const [newFile, setNewFile] = useState<File | null>(null);
   const [newThumbnail, setNewThumbnail] = useState<File | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Pour le recadrage
   
+  // --- ÉTATS DE CHARGEMENT ET RÉUSSITE ---
   const [progress, setProgress] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true); // Chargement des données au début
+  const [saving, setSaving] = useState(false); // Pendant l'enregistrement
   const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
 
+  /**
+   * Au démarrage, on va chercher les infos actuelles du contenu dans la BDD.
+   */
   useEffect(() => {
     const fetchData = async () => {
+      // 1. Récupérer toutes les catégories pour le menu déroulant
       const { data: catData } = await supabase.from("categories").select("*");
       if (catData) setCategories(catData as Category[]);
 
-      const { data: contentData, error } = await supabase
+      // 2. Récupérer les détails précis du contenu à modifier
+      const { data: contentData } = await supabase
         .from("content")
         .select("*")
         .eq("id", contentId)
@@ -58,24 +80,50 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         setThumbnailUrl(contentData.thumbnail_url || "");
         setFileUrl(contentData.file_url || "");
       }
-      setLoading(false);
+      setLoading(false); // Les données sont prêtes
     };
     fetchData();
   }, [contentId]);
 
+  /**
+   * Gère la sélection d'un nouveau fichier (avec limite de 50 Mo).
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFileFn: (f: File | null) => void) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const maxSize = 50 * 1024 * 1024; // 50MB
+      const maxSize = 50 * 1024 * 1024;
       if (selectedFile.size > maxSize) {
-        toast({ title: "Fichier trop volumineux", description: "Max 50Mo autorisé.", variant: "destructive" });
+        toast({ title: "Fichier trop volumineux", description: "Le maximum autorisé est de 50 Mo.", variant: "destructive" });
         e.target.value = "";
         return;
       }
-      setFileFn(selectedFile);
+      
+      // Si c'est une image pour la miniature, on utilise le recadreur
+      if (selectedFile.type.startsWith("image/") && setFileFn === setNewThumbnail) {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          setCropImageSrc(reader.result?.toString() || "");
+        });
+        reader.readAsDataURL(selectedFile);
+        e.target.value = "";
+      } else {
+        setFileFn(selectedFile);
+      }
     }
   };
 
+  /**
+   * Action appelée après le recadrage
+   */
+  const handleCropSubmit = (croppedBlob: Blob) => {
+    const croppedFile = new File([croppedBlob], `thumbnail-${Date.now()}.jpg`, { type: "image/jpeg" });
+    setNewThumbnail(croppedFile);
+    setCropImageSrc(null);
+  };
+
+  /**
+   * Envoie un fichier vers le stockage Supabase.
+   */
   const uploadFile = async (file: File, path: string) => {
     const { data, error } = await supabase.storage.from("media").upload(path, file);
     if (error) throw error;
@@ -83,15 +131,19 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
     return urlData.publicUrl;
   };
 
+  /**
+   * Enregistre les modifications.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setProgress(10);
 
     try {
-      let finalFileUrl = fileUrl;
-      let finalThumbnailUrl = thumbnailUrl;
+      let finalFileUrl = fileUrl; // Par défaut, on garde l'ancien
+      let finalThumbnailUrl = thumbnailUrl; // Par défaut, on garde l'ancienne
 
+      // Si un nouveau fichier principal a été choisi, on l'envoie
       if (newFile) {
         const ext = newFile.name.split(".").pop();
         const path = `${type}/${Date.now()}.${ext}`;
@@ -99,6 +151,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         setProgress(50);
       }
 
+      // Si une nouvelle miniature a été choisie, on l'envoie
       if (newThumbnail) {
         const ext = newThumbnail.name.split(".").pop();
         const path = `thumbnails/${Date.now()}.${ext}`;
@@ -106,6 +159,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         setProgress(80);
       }
 
+      // MISE À JOUR DANS LA BASE DE DONNÉES
       const { error } = await supabase
         .from("content")
         .update({
@@ -118,24 +172,26 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
           body: body || null,
           tags: tags ? tags.split(",").map((t) => t.trim()) : [],
           allow_download: allowDownload,
-          updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(), // On note l'heure de modification
         })
-        .eq("id", contentId);
+        .eq("id", contentId); // Uniquement pour cet élément
 
       if (error) throw error;
 
-      toast({ title: "Modifications enregistrées !" });
-      onSuccess();
-    } catch (err: unknown) {
-      toast({ title: "Erreur", description: err instanceof Error ? err.message : "Erreur inconnue", variant: "destructive" });
+      toast({ title: "Modifications enregistrées avec succès !" });
+      onSuccess(); // Ferme le formulaire et rafraîchit la liste
+    } catch (err: any) {
+      toast({ title: "Erreur lors de l'enregistrement", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
       setProgress(0);
     }
   };
 
-  if (loading) return <div className="p-10 text-center">Chargement des données...</div>;
+  // On attend que les données soient chargées avant d'afficher le formulaire
+  if (loading) return <div className="p-10 text-center text-muted-foreground animate-pulse font-bold">Récupération des informations...</div>;
 
+  // Filtrage des catégories selon le type choisi
   const filteredCategories = categories.filter((c) => {
     if (type === "audio") return c.type === "radio";
     if (type === "video") return c.type === "tv";
@@ -146,48 +202,62 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
 
   return (
     <div className="space-y-6">
+      {/* Fenêtre de recadrage d'image (apparaît si on choisit un fichier) */}
+      {cropImageSrc && (
+        <ImageCropper 
+          imageSrc={cropImageSrc} 
+          onCropSubmit={handleCropSubmit} 
+          onCancel={() => setCropImageSrc(null)} 
+        />
+      )}
+      
+      {/* En-tête de la modification */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Modifier : {title}</h3>
-        <button onClick={onCancel} className="p-2 hover:bg-muted rounded-full">
+        <h3 className="text-lg font-bold uppercase tracking-widest text-primary">Modification du contenu</h3>
+        <button onClick={onCancel} className="p-2 hover:bg-muted rounded-full transition-colors">
           <X size={20} />
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="glass-card p-6 space-y-5">
+        {/* Titre */}
         <div>
-          <label className="text-sm text-muted-foreground mb-1 block">Titre</label>
+          <label className="text-sm text-muted-foreground mb-1 block">Titre du contenu</label>
           <input
             type="text"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground"
+            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50"
           />
         </div>
 
+        {/* Résumé */}
         <div>
-          <label className="text-sm text-muted-foreground mb-1 block">Description</label>
+          <label className="text-sm text-muted-foreground mb-1 block">Résumé / Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground resize-none"
+            className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 resize-none"
           />
         </div>
 
+        {/* Texte complet (Articles et Jobs) */}
         {(type === "article" || type === "job") && (
           <div>
-            <label className="text-sm text-muted-foreground mb-1 block">Corps de l'article</label>
+            <label className="text-sm text-muted-foreground mb-1 block">Contenu complet de l'article</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={10}
-              className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground resize-none"
+              className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 resize-none border-primary/20"
             />
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
+          {/* Catégorie */}
           <div>
             <label className="text-sm text-muted-foreground mb-1 block">Catégorie</label>
             <select
@@ -201,8 +271,9 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
               ))}
             </select>
           </div>
+          {/* Type */}
           <div>
-            <label className="text-sm text-muted-foreground mb-1 block">Type</label>
+            <label className="text-sm text-muted-foreground mb-1 block">Type de média</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as "audio" | "video" | "article" | "image" | "job" | "sport")}
@@ -218,8 +289,9 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
           </div>
         </div>
 
+        {/* Étiquettes */}
         <div>
-          <label className="text-sm text-muted-foreground mb-1 block">Tags (séparés par des virgules)</label>
+          <label className="text-sm text-muted-foreground mb-1 block">Tags (politique, sport...)</label>
           <input
             type="text"
             value={tags}
@@ -228,58 +300,72 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
           />
         </div>
 
-        {/* Media Update Section */}
-        <div className="space-y-4 pt-4 border-t border-border">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Médias</p>
+        {/* --- MISE À JOUR DES MÉDIAS (Partie sensible) --- */}
+        <div className="space-y-4 pt-4 border-t border-border/50">
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Gestion des fichiers</p>
           
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Fichier Principal (Optionnel)</label>
+              <label className="text-xs text-muted-foreground">Changer le fichier principal</label>
               <input
                 type="file"
                 onChange={(e) => handleFileChange(e, setNewFile)}
-                className="text-xs"
+                className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary"
               />
-              {fileUrl && !newFile && <p className="text-[10px] text-primary truncate">Actuel : {fileUrl.split('/').pop()}</p>}
+              {fileUrl && !newFile && <p className="text-[10px] text-primary/70 truncate px-2 italic">Fichier actif : {fileUrl.split('/').pop()}</p>}
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Nouvelle Miniature (Optionnel)</label>
+              <label className="text-xs text-muted-foreground">Changer la miniature</label>
+              
+              {newThumbnail && (
+                <div className="mb-2 relative w-20 h-16 rounded-md overflow-hidden border border-border">
+                  <img src={URL.createObjectURL(newThumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => setNewThumbnail(null)} className="absolute top-0.5 right-0.5 bg-black/50 text-white p-0.5 rounded text-[10px] hover:bg-black">X</button>
+                </div>
+              )}
+              
               <input
                 type="file"
                 onChange={(e) => handleFileChange(e, setNewThumbnail)}
-                className="text-xs"
+                className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary mb-2"
               />
-              {thumbnailUrl && !newThumbnail && <img src={thumbnailUrl} className="h-10 w-20 object-cover rounded" />}
+              {thumbnailUrl && !newThumbnail && <img src={thumbnailUrl} className="h-12 w-24 object-cover rounded-md border border-border shadow-sm" alt="Aperçu actuel" />}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 p-4 glass-card bg-primary/5 border-primary/20">
+        {/* Option de téléchargement */}
+        <div className="flex items-center gap-3 p-4 glass-card bg-primary/5 border-primary/20 cursor-pointer" onClick={() => setAllowDownload(!allowDownload)}>
           <input
             type="checkbox"
             id="allowDownloadEdit"
             checked={allowDownload}
             onChange={(e) => setAllowDownload(e.target.checked)}
-            className="w-5 h-5 accent-primary"
+            className="w-5 h-5 accent-primary cursor-pointer"
           />
-          <label htmlFor="allowDownloadEdit" className="text-sm font-medium text-foreground">
-            Autoriser le téléchargement
+          <label htmlFor="allowDownloadEdit" className="text-sm font-medium text-foreground cursor-pointer">
+            Autoriser les visiteurs à télécharger ce contenu
           </label>
         </div>
 
+        {/* Barre de progression pendant l'enregistrement (si nouveaux fichiers) */}
         {saving && (
-          <div className="space-y-2">
+          <div className="space-y-2 bg-primary/5 p-3 rounded-lg border border-primary/10">
+            <div className="flex justify-between text-[10px] font-bold text-primary uppercase">
+              <span>Synchronisation en cours...</span>
+              <span>{progress}%</span>
+            </div>
             <Progress value={progress} className="h-2" />
-            <p className="text-[10px] text-center text-primary animate-pulse">Enregistrement...</p>
           </div>
         ) }
 
-        <div className="flex gap-3 pt-4">
+        {/* Boutons d'action finaux */}
+        <div className="flex gap-4 pt-4 border-t border-border/50">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-3 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
+            className="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted transition-all text-sm font-bold uppercase tracking-widest"
           >
             Annuler
           </button>
@@ -289,7 +375,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
             className="flex-1 btn-primary-glow flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Save size={18} />
-            Enregistrer les modifications
+            {saving ? "Enregistrement..." : "Appliquer les modifications"}
           </button>
         </div>
       </form>

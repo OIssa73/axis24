@@ -1,8 +1,13 @@
+// Importation des outils de React pour gérer l'affichage et les effets
 import { useState, useEffect } from "react";
+// Importation des outils d'animation (Framer Motion)
 import { motion, AnimatePresence } from "framer-motion";
+// Importation des icônes (Lien, Megaphone, Étoile, Loader, Croix)
 import { ExternalLink, Megaphone, Star, Loader2, X } from "lucide-react";
+// Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
 
+// Structure d'un Partenaire (ex: un sponsor)
 interface Partner {
   id: string;
   name: string;
@@ -11,6 +16,7 @@ interface Partner {
   enabled: boolean;
 }
 
+// Structure d'une Bannière Publicitaire
 export interface AdBanner {
   id: string;
   enabled: boolean;
@@ -20,26 +26,37 @@ export interface AdBanner {
   description: string;
 }
 
+// Configuration globale des publicités sur le site
 interface AdsConfig {
   banners: AdBanner[];
   partners: Partner[];
   showCta: boolean;
 }
 
+// Configuration par défaut (vide au départ)
 const defaultAdsConfig: AdsConfig = {
   banners: [],
   partners: [],
   showCta: true
 };
 
+/**
+ * Composant ADS WIDGET (Espace Publicitaire et Partenaires).
+ * Ce composant affiche les bannières qui défilent et la liste des partenaires.
+ * Il se met à jour automatiquement si l'administrateur change la config.
+ */
 const AdsWidget = () => {
   const [config, setConfig] = useState<AdsConfig>(defaultAdsConfig);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAd, setSelectedAd] = useState<AdBanner | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0); // Index de la publicité affichée
+  const [selectedAd, setSelectedAd] = useState<AdBanner | null>(null); // Publicité agrandie en modal
 
+  /**
+   * Effet pour récupérer la configuration depuis Supabase au chargement.
+   */
   useEffect(() => {
     const fetchConfig = async () => {
+      // On récupère la clé "ads_config" dans la table "site_settings"
       const { data } = await supabase
         .from("site_settings")
         .select("value")
@@ -47,9 +64,9 @@ const AdsWidget = () => {
         .maybeSingle();
 
       if (data && data.value) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const val = data.value as any;
         
+        // Gestion de la liste des bannières (compatibilité ancien/nouveau format)
         let loadedBanners: AdBanner[] = [];
         if (val.banners && Array.isArray(val.banners)) {
           loadedBanners = val.banners;
@@ -57,6 +74,7 @@ const AdsWidget = () => {
           loadedBanners = [{ ...val.banner, id: "legacy-1", enabled: val.banner.enabled !== false }];
         }
 
+        // Nettoyage et activation des partenaires
         const partners = (val.partners || []).map((p: any) => ({ ...p, enabled: p.enabled !== false }));
         setConfig({ banners: loadedBanners, partners, showCta: val.showCta !== false });
       }
@@ -65,6 +83,10 @@ const AdsWidget = () => {
     
     fetchConfig();
 
+    /**
+     * LOGIQUE DE TEMPS RÉEL : 
+     * Si l'admin modifie une publicité, le site se met à jour instantanément sans recharger la page.
+     */
     const channel = supabase
       .channel("ads_config_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings", filter: "key=eq.ads_config" },
@@ -80,7 +102,10 @@ const AdsWidget = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Auto-rotation logic
+  /**
+   * LOGIQUE DE ROTATION AUTOMATIQUE :
+   * Les publicités changent toutes les 5 secondes s'il y en a plusieurs.
+   */
   const activeBanners = config.banners.filter(b => b.enabled);
   
   useEffect(() => {
@@ -88,17 +113,19 @@ const AdsWidget = () => {
     
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % activeBanners.length);
-    }, 5000); // 5 seconds ad rotation
+    }, 5000); // 5 secondes par pub
     
     return () => clearInterval(interval);
   }, [activeBanners.length]);
 
+  // Si rien n'est à afficher, on ne rend rien du tout
   if (!loading && activeBanners.length === 0 && config.partners.filter(p => p.enabled).length === 0) return null;
 
   const currentBanner = activeBanners[currentIndex];
 
   return (
     <section className="py-12 bg-muted/20 border-y border-border/50 relative overflow-hidden">
+      {/* Indicateur de chargement discret */}
       {loading && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
            <Loader2 className="animate-spin text-primary" />
@@ -108,7 +135,7 @@ const AdsWidget = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-start gap-12">
           
-          {/* ZONE BANNIERE CARROUSEL */}
+          {/* --- ZONE BANNIERE CARROUSEL (Partie gauche) --- */}
           <div className="flex-1 w-full flex flex-col justify-center min-h-[300px]">
             <div className="flex items-center gap-3 mb-6">
               <Megaphone size={18} className="text-primary animate-bounce" />
@@ -120,7 +147,7 @@ const AdsWidget = () => {
                 <AnimatePresence mode="wait">
                   <motion.button 
                     key={currentBanner?.id}
-                    onClick={() => setSelectedAd(currentBanner)}
+                    onClick={() => setSelectedAd(currentBanner)} // Agrandit la pub au clic
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -149,11 +176,12 @@ const AdsWidget = () => {
                   </motion.button>
                 </AnimatePresence>
                 
+                {/* Petit étiquette "Sponsorisé" */}
                 <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded border border-white/10">
                   Sponsorisé
                 </div>
                 
-                {/* Pagination Dots */}
+                {/* Points de navigation (si plusieurs pubs) */}
                 {activeBanners.length > 1 && (
                   <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-2">
                     {activeBanners.map((_, idx) => (
@@ -175,7 +203,7 @@ const AdsWidget = () => {
             )}
           </div>
 
-          {/* ZONE PARTENAIRES (Reste Inchangée) */}
+          {/* --- ZONE PARTENAIRES (Partie droite) --- */}
           <div className="w-full md:w-80 shrink-0">
             <div className="flex items-center gap-3 mb-6">
               <Star size={18} className="text-secondary" />
@@ -213,7 +241,7 @@ const AdsWidget = () => {
         </div>
       </div>
 
-      {/* POP-UP MODAL PUBLICITAIRE */}
+      {/* --- POP-UP MODAL PUBLICITAIRE (Agrandissement) --- */}
       <AnimatePresence>
         {selectedAd && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
@@ -223,6 +251,7 @@ const AdsWidget = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="bg-background rounded-2xl overflow-hidden shadow-2xl border border-border/50 max-w-4xl w-full max-h-[90vh] flex flex-col relative"
             >
+              {/* Bouton de fermeture de la modal */}
               <button 
                 onClick={() => setSelectedAd(null)}
                 className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors"
@@ -253,6 +282,7 @@ const AdsWidget = () => {
                   </p>
                 )}
                 
+                {/* Bouton vers le lien de l'annonceur */}
                 <a 
                   href={selectedAd.linkUrl || "#"}
                   target="_blank"
