@@ -92,8 +92,8 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
 
   return (
     <section id="radio" className="py-12 relative overflow-hidden bg-background">
-      {/* Effet visuel flou en arrière-plan */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
+      {/* Effet visuel flou en arrière-plan (masqué sur mobile pour les perfs) */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2 hidden md:block" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* --- EN-TÊTE --- */}
