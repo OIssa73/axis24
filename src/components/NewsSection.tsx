@@ -170,7 +170,7 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
                       {article.title}
                     </h3>
                     
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-6 flex-1 text-justify [text-justify:inter-character]">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-6 flex-1 text-justify md:[text-justify:inter-character] break-words min-w-0 w-full overflow-hidden">
                       {article.description}
                     </p>
                     

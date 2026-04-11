@@ -159,7 +159,7 @@ const ContentDetail = () => {
             </h1>
             
             {/* Le Sapeau (introduction) */}
-            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed italic border-l-4 border-primary/40 pl-8 py-2 font-light break-words max-w-full text-justify [text-justify:inter-character]">
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed italic border-l-4 border-primary/40 pl-8 py-2 font-light break-words min-w-0 w-full overflow-hidden text-justify md:[text-justify:inter-character]">
               {content.description}
             </p>
           </motion.div>
@@ -207,9 +207,9 @@ const ContentDetail = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed"
+              className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed min-w-0 w-full"
             >
-              <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap break-words max-w-full overflow-hidden [word-break:break-word] text-justify [text-justify:inter-character]">
+              <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap break-words min-w-0 w-full overflow-hidden [word-break:break-word] text-justify md:[text-justify:inter-character]">
                 {content.body || "Pas de texte supplémentaire pour cet élément."}
               </div>
             </motion.div>

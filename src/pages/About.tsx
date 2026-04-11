@@ -115,7 +115,7 @@ Nous nous engageons à :
             <Info className="w-8 h-8 text-primary" />
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-widest mb-6">À Propos & Ligne Éditoriale</h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto italic text-justify [text-justify:inter-character]">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto italic text-justify md:[text-justify:inter-character] min-w-0 w-full break-words px-2">
             Découvrez qui nous sommes et notre engagement quotidien pour une information claire, locale et pertinente.
           </p>
         </motion.div>
@@ -136,7 +136,7 @@ Nous nous engageons à :
               prose-headings:font-display prose-headings:uppercase prose-headings:tracking-widest 
               prose-h2:text-3xl prose-h2:text-primary prose-h2:mt-16 prose-h2:mb-8 prose-h2:border-b prose-h2:border-border prose-h2:pb-4
               prose-h3:text-xl prose-h3:text-secondary prose-h3:mt-8
-              prose-p:text-lg prose-p:leading-relaxed prose-p:text-muted-foreground prose-p:text-justify prose-p:[text-justify:inter-character]
+              prose-p:text-lg prose-p:leading-relaxed prose-p:text-muted-foreground prose-p:text-justify md:prose-p:[text-justify:inter-character] prose-p:break-words prose-p:min-w-0 prose-p:w-full
               prose-ul:text-foreground prose-li:marker:text-primary prose-li:my-2
               glass-card p-6 md:p-12 rounded-3xl"
           >
