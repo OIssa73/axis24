@@ -154,7 +154,7 @@ const ContentDetail = () => {
             </div>
             
             {/* Le Titre principal */}
-            <h1 className="font-display text-4xl md:text-7xl text-foreground font-extrabold leading-[1.05] tracking-tight drop-shadow-sm break-words max-w-full overflow-hidden">
+            <h1 className="font-display text-3xl md:text-5xl text-foreground font-extrabold leading-[1.1] tracking-tight drop-shadow-sm break-words max-w-full overflow-hidden">
               {content.title}
             </h1>
             

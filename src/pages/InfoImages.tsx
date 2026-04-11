@@ -96,7 +96,7 @@ const InfoImages = () => {
               <p className="text-primary font-bold text-xs uppercase tracking-[0.4em] mb-4">
                 Le regard de la rédaction
               </p>
-              <h1 className="section-heading text-foreground font-display text-5xl md:text-7xl uppercase tracking-tighter">L'INFO EN IMAGES</h1>
+              <h1 className="section-heading text-foreground font-display text-3xl md:text-5xl uppercase tracking-widest">L'INFO EN IMAGES</h1>
               <p className="text-muted-foreground mt-4 max-w-2xl mx-auto italic">
                 Découvrez l'essentiel de l'actualité à travers nos plus beaux clichés et reportages photographiques.
               </p>
