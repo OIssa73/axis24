@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 // Importation de la connexion à Supabase
 import { supabase } from "@/integrations/supabase/client";
-// Importation de Framer Motion pour les animations de page
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 // Importation des icônes d'interface
 import { Calendar, Eye, ArrowLeft, Download, Headphones, Play, Share2 } from "lucide-react";
 // Importation des composants globaux (Barre de navigation et Pied de page)
@@ -38,7 +37,8 @@ const ContentDetail = () => {
   const { id } = useParams();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
-  const [adBanner, setAdBanner] = useState<any>(null);
+  const [activeBanners, setActiveBanners] = useState<any[]>([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -78,8 +78,7 @@ const ContentDetail = () => {
            loadedBanners = [val.banner];
         }
         if (loadedBanners.length > 0) {
-           // On prend une publicité au hasard parmi celles actives
-           setAdBanner(loadedBanners[Math.floor(Math.random() * loadedBanners.length)]);
+           setActiveBanners(loadedBanners);
         }
       }
     };
@@ -87,6 +86,21 @@ const ContentDetail = () => {
     fetchContent();
     fetchAd();
   }, [id]);
+
+  /**
+   * Effet pour gérer le défilement automatique des publicités.
+   */
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % activeBanners.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [activeBanners.length]);
+
+  const adBanner = activeBanners[currentAdIndex];
 
   /**
    * Copie l'adresse de la page dans le presse-papier pour partage.
@@ -235,17 +249,31 @@ const ContentDetail = () => {
               {/* Petit encart Publicitaire */}
               <div className="p-6 rounded-[2rem] bg-muted/40 border border-border/50 shadow-inner">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-4 opacity-70">Publicité Partenaire</p>
-                {adBanner ? (
-                  <a href={adBanner.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block relative aspect-square bg-background/50 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-colors group">
-                    {adBanner.imageUrl ? (
-                      <img src={adBanner.imageUrl} alt={adBanner.title || "Publicité"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
-                        <span className="font-display text-primary font-bold text-lg uppercase">{adBanner.title || "Sponsor"}</span>
-                        <span className="text-xs text-muted-foreground mt-2 line-clamp-3 px-2">{adBanner.description}</span>
-                      </div>
-                    )}
-                  </a>
+                {activeBanners.length > 0 && adBanner ? (
+                  <div className="relative aspect-square bg-background/50 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-colors group">
+                    <AnimatePresence mode="wait">
+                      <motion.a 
+                        key={adBanner.id || currentAdIndex}
+                        href={adBanner.linkUrl || "#"} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                        className="absolute inset-0 block w-full h-full"
+                      >
+                        {adBanner.imageUrl ? (
+                          <img src={adBanner.imageUrl} alt={adBanner.title || "Publicité"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                            <span className="font-display text-primary font-bold text-lg uppercase">{adBanner.title || "Sponsor"}</span>
+                            <span className="text-xs text-muted-foreground mt-2 line-clamp-3 px-2">{adBanner.description}</span>
+                          </div>
+                        )}
+                      </motion.a>
+                    </AnimatePresence>
+                  </div>
                 ) : (
                   <div className="aspect-square bg-background/50 rounded-2xl flex items-center justify-center text-[9px] text-muted-foreground uppercase text-center p-6 italic leading-relaxed border border-dashed border-border group hover:border-primary/20 transition-colors">
                     Espace publicitaire <br /> réservé à nos partenaires
