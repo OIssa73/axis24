@@ -183,3 +183,22 @@ body {
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* --- OPTIMISATIONS MOBILES STRICTES --- */
+@media (max-width: 768px) {
+  /* 1. Désactivation pure et dure des flous coûteux (Glassmorphism) pour fluidifier le défilement */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Annulation systématique des justifications sur mobile pour éviter les débordements de textes et gros trous */
+  .text-justify, 
+  [class*="text-justify:"],
+  [class*="[text-justify"],
+  .prose p {
+    text-align: left !important;
+    text-justify: auto !important;
+  }
+}
+
