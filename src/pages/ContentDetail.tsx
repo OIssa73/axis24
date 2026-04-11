@@ -38,6 +38,7 @@ const ContentDetail = () => {
   const { id } = useParams();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adBanner, setAdBanner] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -65,7 +66,26 @@ const ContentDetail = () => {
       }
       setLoading(false);
     };
+
+    const fetchAd = async () => {
+      const { data } = await supabase.from("site_settings").select("value").eq("key", "ads_config").maybeSingle();
+      if (data && data.value) {
+        const val = data.value as any;
+        let loadedBanners: any[] = [];
+        if (val.banners && Array.isArray(val.banners)) {
+           loadedBanners = val.banners.filter((b: any) => b.enabled !== false);
+        } else if (val.banner && val.banner.enabled !== false) {
+           loadedBanners = [val.banner];
+        }
+        if (loadedBanners.length > 0) {
+           // On prend une publicité au hasard parmi celles actives
+           setAdBanner(loadedBanners[Math.floor(Math.random() * loadedBanners.length)]);
+        }
+      }
+    };
+
     fetchContent();
+    fetchAd();
   }, [id]);
 
   /**
@@ -215,9 +235,22 @@ const ContentDetail = () => {
               {/* Petit encart Publicitaire */}
               <div className="p-6 rounded-[2rem] bg-muted/40 border border-border/50 shadow-inner">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-4 opacity-70">Publicité Partenaire</p>
-                <div className="aspect-square bg-background/50 rounded-2xl flex items-center justify-center text-[9px] text-muted-foreground uppercase text-center p-6 italic leading-relaxed border border-dashed border-border group hover:border-primary/20 transition-colors">
-                  Espace publicitaire <br /> réservé à nos partenaires
-                </div>
+                {adBanner ? (
+                  <a href={adBanner.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block relative aspect-square bg-background/50 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-colors group">
+                    {adBanner.imageUrl ? (
+                      <img src={adBanner.imageUrl} alt={adBanner.title || "Publicité"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                        <span className="font-display text-primary font-bold text-lg uppercase">{adBanner.title || "Sponsor"}</span>
+                        <span className="text-xs text-muted-foreground mt-2 line-clamp-3 px-2">{adBanner.description}</span>
+                      </div>
+                    )}
+                  </a>
+                ) : (
+                  <div className="aspect-square bg-background/50 rounded-2xl flex items-center justify-center text-[9px] text-muted-foreground uppercase text-center p-6 italic leading-relaxed border border-dashed border-border group hover:border-primary/20 transition-colors">
+                    Espace publicitaire <br /> réservé à nos partenaires
+                  </div>
+                )}
               </div>
             </motion.aside>
           </div>
