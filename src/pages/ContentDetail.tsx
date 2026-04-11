@@ -209,7 +209,8 @@ const ContentDetail = () => {
               transition={{ delay: 0.4 }}
               className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed"
             >
-              <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap font-sans break-words max-w-full overflow-hidden [word-break:break-word] text-justify [text-justify:inter-character]">
+            >
+              <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap break-words max-w-full overflow-hidden [word-break:break-word] text-justify [text-justify:inter-character]">
                 {content.body || "Pas de texte supplémentaire pour cet élément."}
               </div>
             </motion.div>
