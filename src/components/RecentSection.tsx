@@ -74,7 +74,7 @@ const RecentSection = () => {
             >
               <Link 
                 to={`/content/${item.id}`}
-                className="group block relative overflow-hidden rounded-2xl glass-card border border-border/50 hover:border-primary/50 transition-all aspect-square sm:aspect-auto sm:h-64 h-64"
+                className="group block relative overflow-hidden rounded-2xl glass-card border border-border/50 hover:border-primary/50 transition-all w-full h-[300px] sm:h-64"
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
                 

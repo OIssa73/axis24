@@ -121,14 +121,14 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
               {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
             </button>
 
-            <div className="flex-1 min-w-0 text-center md:text-left">
-              <span className="text-primary text-[10px] uppercase font-bold tracking-[0.4em] mb-2 block opacity-70">
+            <div className="flex-1 min-w-0 w-full overflow-hidden text-center md:text-left">
+              <span className="text-primary text-[10px] uppercase font-bold tracking-[0.4em] mb-2 block opacity-70 w-full truncate">
                 {currentAudio?.categories?.name || (isPlaying ? "En cours de diffusion" : "Prêt pour l'écoute")}
               </span>
-              <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-tight truncate font-bold mb-1">
+              <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-tight truncate font-bold mb-1 w-full">
                 {currentAudio?.title || "Sélectionnez un podcast"}
               </h3>
-              <p className="text-xs text-muted-foreground truncate italic opacity-60">
+              <p className="text-xs text-muted-foreground truncate italic opacity-60 w-full">
                 {currentAudio?.description || "Parcourez notre collection ci-dessous"}
               </p>
               
