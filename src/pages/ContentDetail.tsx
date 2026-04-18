@@ -178,7 +178,11 @@ const ContentDetail = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="relative rounded-[2rem] overflow-hidden glass-card shadow-2xl mb-16 aspect-video bg-muted border border-border shadow-primary/5"
+            className={`relative rounded-[2rem] overflow-hidden glass-card shadow-2xl mb-16 border border-border shadow-primary/5 ${
+              content.type === "image" 
+                ? "flex items-center justify-center bg-black/5" 
+                : "aspect-video bg-muted"
+            }`}
           >
             {/* Si c'est une vidéo */}
             {content.type === "video" && content.file_url ? (
@@ -199,7 +203,11 @@ const ContentDetail = () => {
               <img 
                 src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
                 alt={content.title} 
-                className={`w-full h-full transition-transform duration-700 hover:scale-[1.02] ${content.type === "image" ? "object-contain bg-black/95" : "object-cover"}`}
+                className={`w-full transition-transform duration-700 hover:scale-[1.02] ${
+                  content.type === "image" 
+                    ? "h-auto max-h-[85vh] object-contain" 
+                    : "h-full object-cover"
+                }`}
               />
             ) : 
             /* Par défaut (Logo Axis24) */
