@@ -5,7 +5,7 @@ import ReactCrop, { centerCrop, makeAspectCrop, Crop, PixelCrop } from "react-im
 // Importation du CSS nécessaire à l'affichage de la zone de sélection de la bibliothèque
 import "react-image-crop/dist/ReactCrop.css";
 // Importation des icônes de contrôle
-import { X, Check, Maximize, Portrait, Monitor, Square } from "lucide-react";
+import { X, Check, Maximize, Smartphone, Monitor, Square } from "lucide-react";
 
 // --- PROPRIÉTÉS DU COMPOSANT ---
 interface ImageCropperProps {
@@ -126,7 +126,7 @@ export default function ImageCropper({ imageSrc, onCropSubmit, onCancel }: Image
                 onClick={() => handleAspectChange(3/4)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${currentAspect === 3/4 ? 'bg-primary text-white shadow' : 'text-muted-foreground hover:bg-black/20'}`}
             >
-                <Portrait size={14} /> 3:4
+                <Smartphone size={14} /> 3:4
             </button>
             <button 
                 onClick={() => handleAspectChange(1)}
