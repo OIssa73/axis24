@@ -168,60 +168,17 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
            </div>
         </div>
 
-        {/* --- LECTEUR DE PODCAST (Le gros bloc en haut) --- */}
-        <div className="glass-card p-8 md:p-10 max-w-3xl mx-auto mb-20 border-primary/20 bg-primary/5 backdrop-blur-3xl shadow-2xl shadow-primary/5 rounded-[2.5rem]">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            {/* Bouton Play/Pause massif */}
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-110 transition-transform shrink-0 shadow-2xl shadow-primary/30"
-            >
-              {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
-            </button>
-
-            <div className="flex-1 min-w-0 w-full overflow-hidden text-center md:text-left">
-              <span className="text-primary text-[10px] uppercase font-bold tracking-[0.4em] mb-2 block opacity-70 w-full truncate">
-                {currentAudio?.categories?.name || (isPlaying ? "En cours de diffusion" : "Prêt pour l'écoute")}
-              </span>
-              <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-tight truncate font-bold mb-1 w-full">
-                {currentAudio?.title || "Sélectionnez un podcast"}
-              </h3>
-              <p className="text-xs text-muted-foreground truncate italic opacity-60 w-full">
-                {currentAudio?.description || "Parcourez notre collection ci-dessous"}
-              </p>
-              
-              {/* L'élément audio de navigateur caché qui gère le flux son */}
-              {currentAudio?.file_url && (
-                <audio
-                  src={currentAudio.file_url}
-                  autoPlay={isPlaying}
-                  ref={(el) => {
-                    if (el) {
-                      if (isPlaying) el.play().catch(() => setIsPlaying(false));
-                      else el.pause();
-                    }
-                  }}
-                  onEnded={() => setIsPlaying(false)}
-                />
-              )}
-            </div>
-
-            {/* Animation d'ondes sonores (purement visuel) */}
-            <div className="hidden md:flex items-center gap-1.5 h-8">
-               {[1, 2, 3, 4, 3, 2, 1].map((h, i) => (
-                 <div 
-                   key={i} 
-                   className={`w-1.5 bg-primary/40 rounded-full transition-all duration-300 ${isPlaying ? "animate-pulse" : "h-2"}`} 
-                   style={{ height: isPlaying ? `${h * 15}px` : "8px", animationDelay: `${i * 0.1}s` }}
-                 />
-               ))}
-            </div>
-          </div>
+        {/* --- SECTION: PODCASTS & REPLAYS --- */}
+        <div className="mt-24 mb-10 text-center">
+          <h3 className="font-display text-3xl sm:text-4xl text-foreground font-bold uppercase tracking-widest mb-2">
+            🎙️ Podcasts & Replays
+          </h3>
+          <p className="text-muted-foreground opacity-80 text-sm">Réécoutez nos émissions n'importe quand, à la demande.</p>
         </div>
 
         {/* --- ONGLETS DE FILTRAGE --- */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap justify-center gap-3 mb-16">
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -235,6 +192,59 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
                 {cat}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* --- LECTEUR DE PODCAST (Le gros bloc rouge qui était en haut) --- */}
+        {filteredPodcasts.length > 0 && currentAudio && (
+          <div className="glass-card p-8 md:p-10 max-w-3xl mx-auto mb-16 border-primary/20 bg-primary/5 backdrop-blur-3xl shadow-2xl shadow-primary/5 rounded-[2.5rem]">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* Bouton Play/Pause massif */}
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground hover:scale-110 transition-transform shrink-0 shadow-2xl shadow-primary/30"
+              >
+                {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
+              </button>
+
+              <div className="flex-1 min-w-0 w-full overflow-hidden text-center md:text-left">
+                <span className="text-primary text-[10px] uppercase font-bold tracking-[0.4em] mb-2 block opacity-70 w-full truncate">
+                  {currentAudio?.categories?.name || (isPlaying ? "En cours de diffusion" : "Prêt pour l'écoute")}
+                </span>
+                <h3 className="font-display text-2xl md:text-3xl text-foreground tracking-tight truncate font-bold mb-1 w-full">
+                  {currentAudio?.title || "Sélectionnez un podcast"}
+                </h3>
+                <p className="text-xs text-muted-foreground truncate italic opacity-60 w-full">
+                  {currentAudio?.description || "Parcourez notre collection ci-dessous"}
+                </p>
+                
+                {/* L'élément audio de navigateur caché qui gère le flux son */}
+                {currentAudio?.file_url && (
+                  <audio
+                    src={currentAudio.file_url}
+                    autoPlay={isPlaying}
+                    ref={(el) => {
+                      if (el) {
+                        if (isPlaying) el.play().catch(() => setIsPlaying(false));
+                        else el.pause();
+                      }
+                    }}
+                    onEnded={() => setIsPlaying(false)}
+                  />
+                )}
+              </div>
+
+              {/* Animation d'ondes sonores (purement visuel) */}
+              <div className="hidden md:flex items-center gap-1.5 h-8">
+                 {[1, 2, 3, 4, 3, 2, 1].map((h, i) => (
+                   <div 
+                     key={i} 
+                     className={`w-1.5 bg-primary/40 rounded-full transition-all duration-300 ${isPlaying ? "animate-pulse" : "h-2"}`} 
+                     style={{ height: isPlaying ? `${h * 15}px` : "8px", animationDelay: `${i * 0.1}s` }}
+                   />
+                 ))}
+              </div>
+            </div>
           </div>
         )}
 
