@@ -148,7 +148,7 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
                  </span>
                </div>
                <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground tracking-wide">
-                 {language === "en" ? "RFI Radio English" : "RFI Radio Monde"}
+                 {language === "en" ? "RFI Radio English" : "RFI Radio Afrique"}
                </h3>
                <p className="text-xs text-muted-foreground opacity-80 max-w-sm line-clamp-2 mt-1">
                  {isLivePlaying ? "Vous écoutez actuellement le flux radio international." : "Démarrez l'information en continu, où que vous soyez."}

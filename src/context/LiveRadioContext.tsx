@@ -12,9 +12,9 @@ const LiveRadioContext = createContext<LiveRadioContextType | undefined>(undefin
 
 // Tableau en cascade des Flux Audio RFI (du plus fiable/rapide pour faible réseau au principal)
 const STREAMS_FR = [
-  "https://rfimonde64k.ice.infomaniak.ch/rfimonde-64.mp3", // Ultra-rapide, 64kbps stable
-  "http://live02.rfi.fr/rfimonde-96k.mp3",                 // Qualité normale
-  "https://rfi-monde.fr.ice.infomaniak.ch/rfi-monde.mp3"   // Miroir
+  "https://rfiafrique64k.ice.infomaniak.ch/rfiafrique-64.mp3", // RFI Afrique - 64kbps stable
+  "http://live02.rfi.fr/rfiafrique-96k.mp3",                 // Qualité normale
+  "https://rfi-afrique.fr.ice.infomaniak.ch/rfi-afrique.mp3"  // Miroir Afrique
 ];
 
 const STREAMS_EN = [
