@@ -82,11 +82,11 @@ const AdminSettings = () => {
       if (data) {
         // Chargement des sections (Vrai/Faux)
         const sectionsData = data.find(d => d.key === "homepage_sections");
-        if (sectionsData) setSections(sectionsData.value as any);
+        if (sectionsData) setSections(sectionsData.value as unknown as Sections);
         
         // Chargement des titres envoyés (on complète avec les par défaut si besoin)
         const titlesData = data.find(d => d.key === "section_titles");
-        if (titlesData) setTitles({ ...defaultTitles, ...(titlesData.value as any) });
+        if (titlesData) setTitles({ ...defaultTitles, ...(titlesData.value as unknown as SectionTitles) });
       }
       setLoading(false);
     };
@@ -107,12 +107,12 @@ const AdminSettings = () => {
     // 1. Sauvegarde des visibilités
     const { error: err1 } = await supabase
       .from("site_settings")
-      .upsert({ key: "homepage_sections", value: sections as any });
+      .upsert({ key: "homepage_sections", value: sections as unknown as Record<string, unknown> });
       
     // 2. Sauvegarde des textes (titres/sous-titres)
     const { error: err2 } = await supabase
       .from("site_settings")
-      .upsert({ key: "section_titles", value: titles as any });
+      .upsert({ key: "section_titles", value: titles as unknown as Record<string, unknown> });
 
     if (err1 || err2) {
       toast({ title: "Une erreur est survenue", description: (err1 || err2)?.message, variant: "destructive" });

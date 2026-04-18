@@ -44,11 +44,15 @@ const AdminStats = () => {
         .maybeSingle();
 
       if (adsData && adsData.value) {
-        const val: any = adsData.value;
+        interface AdsConfig {
+          banners?: { enabled?: boolean }[];
+          banner?: { enabled?: boolean };
+        }
+        const val = adsData.value as AdsConfig;
         // On récupère la liste des bannières (format moderne ou ancien)
         const banners = Array.isArray(val.banners) ? val.banners : (val.banner ? [val.banner] : []);
         // On ne compte que celles qui sont marquées comme "enabled" (activées)
-        adsCount = banners.filter((b: any) => b.enabled !== false).length;
+        adsCount = banners.filter((b) => b.enabled !== false).length;
       }
 
       // 3. Calculs et mise à jour de l'état

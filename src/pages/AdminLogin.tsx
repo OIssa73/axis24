@@ -64,11 +64,11 @@ const AdminLogin = () => {
       toast({ title: "Connexion réussie", description: "Bienvenue sur l'interface Axis24." });
       navigate("/admin");
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Affichage de l'erreur dans une notification rouge
       toast({ 
         title: "Échec de connexion", 
-        description: err.message || "Identifiants incorrects.", 
+        description: (err as Error).message || "Identifiants incorrects.", 
         variant: "destructive" 
       });
     } finally {

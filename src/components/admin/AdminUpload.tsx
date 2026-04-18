@@ -173,12 +173,12 @@ const AdminUpload = () => {
       setThumbnail(null);
       setAllowDownload(true);
       setProgress(0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setProgress(0);
       console.error("Erreur Upload:", err);
       toast({ 
         title: "Échec de l'envoi", 
-        description: err.message || "Une erreur est survenue lors de l'enregistrement.", 
+        description: (err as Error).message || "Une erreur est survenue lors de l'enregistrement.", 
         variant: "destructive" 
       });
     } finally {

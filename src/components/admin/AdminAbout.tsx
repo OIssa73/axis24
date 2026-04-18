@@ -38,8 +38,8 @@ const AdminAbout = () => {
 
       if (error) throw error;
       toast({ title: "Contenu mis à jour", description: "La page À Propos a été modifiée avec succès."});
-    } catch (error: any) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur", description: (error as Error).message, variant: "destructive" });
     } finally {
       setSaving(false);
     }

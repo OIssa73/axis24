@@ -53,7 +53,7 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualitÃ
         // --- LOGIQUE DE FILTRAGE ---
         // On ne garde que ceux qui sont dans une catÃ©gorie "Sport" ou qui ont le type natif "sport"
         const sportsArticles = (data as unknown as Article[]).filter(
-          a => a.categories?.name === "Sport" || a.categories?.name === "Sports" || (a as any).type === "sport"
+          a => a.categories?.name === "Sport" || a.categories?.name === "Sports" || (a as unknown as { type: string }).type === "sport"
         );
         setArticles(sportsArticles);
       }

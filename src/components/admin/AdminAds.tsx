@@ -89,7 +89,7 @@ const AdminAds = () => {
         .maybeSingle();
 
       if (data && data.value) {
-        const val = data.value as any;
+        const val = data.value as { banners?: AdBanner[], banner?: AdBanner, partners?: Partner[], showCta?: boolean };
         
         let loadedBanners: AdBanner[] = [];
         // Gestion de la transition entre l'ancien format (1 seule bannière) et le nouveau (liste)
@@ -101,7 +101,7 @@ const AdminAds = () => {
           loadedBanners = [defaultBanner];
         }
 
-        const partners = (val.partners || []).map((p: any) => ({ ...p, enabled: p.enabled !== false }));
+        const partners = (val.partners || []).map((p: Partner) => ({ ...p, enabled: p.enabled !== false }));
         const showCta = val.showCta !== false;
 
         setConfig({ banners: loadedBanners, partners, showCta });
@@ -120,7 +120,7 @@ const AdminAds = () => {
     setSaving(true);
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ key: "ads_config", value: config as any });
+      .upsert({ key: "ads_config", value: config as unknown as Record<string, unknown> });
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -149,8 +149,8 @@ const AdminAds = () => {
       
       setNewBanner(prev => ({ ...prev, imageUrl: data.publicUrl })); // URL récupérée
       toast({ title: "Image chargée", description: "L'image est prête pour la bannière." });
-    } catch (error: any) {
-      toast({ title: "Échec de l'upload", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Échec de l'upload", description: (error as Error).message, variant: "destructive" });
     } finally {
       setUploading(false);
     }

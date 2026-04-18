@@ -37,7 +37,16 @@ const ContentDetail = () => {
   const { id } = useParams();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeBanners, setActiveBanners] = useState<any[]>([]);
+
+  interface Banner {
+    id?: string;
+    enabled?: boolean;
+    linkUrl?: string;
+    imageUrl?: string;
+    title?: string;
+    description?: string;
+  }
+  const [activeBanners, setActiveBanners] = useState<Banner[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -70,10 +79,10 @@ const ContentDetail = () => {
     const fetchAd = async () => {
       const { data } = await supabase.from("site_settings").select("value").eq("key", "ads_config").maybeSingle();
       if (data && data.value) {
-        const val = data.value as any;
-        let loadedBanners: any[] = [];
+        const val = data.value as { banners?: Banner[], banner?: Banner };
+        let loadedBanners: Banner[] = [];
         if (val.banners && Array.isArray(val.banners)) {
-           loadedBanners = val.banners.filter((b: any) => b.enabled !== false);
+           loadedBanners = val.banners.filter((b) => b.enabled !== false);
         } else if (val.banner && val.banner.enabled !== false) {
            loadedBanners = [val.banner];
         }

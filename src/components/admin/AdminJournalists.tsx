@@ -63,8 +63,8 @@ const AdminJournalists = () => {
         }));
         setJournalists(merged as Journalist[]);
       }
-    } catch (error: any) {
-      toast({ title: "Erreur de chargement", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur de chargement", description: (error as Error).message, variant: "destructive" });
     }
   };
 
@@ -161,7 +161,7 @@ const AdminJournalists = () => {
 
       await supabase
         .from("site_settings")
-        .upsert({ key: "journalists_bios", value: updatedBios as any });
+        .upsert({ key: "journalists_bios", value: updatedBios as unknown as Record<string, unknown> });
 
       toast({ 
         title: editingId ? "Journaliste modifié" : "Journaliste ajouté !", 
@@ -171,8 +171,8 @@ const AdminJournalists = () => {
       // 4. Nettoyage du formulaire
       cancelEdit();
       fetchJournalists();
-    } catch (error: any) {
-      toast({ title: "Erreur", description: error.message || "Une erreur est survenue.", variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur", description: (error as Error).message || "Une erreur est survenue.", variant: "destructive" });
     } finally {
       setProgress(100);
       setTimeout(() => {
@@ -196,13 +196,13 @@ const AdminJournalists = () => {
       if (settingsData?.value) {
         const bios = settingsData.value as Record<string, string>;
         delete bios[id];
-        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as any });
+        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as unknown as Record<string, unknown> });
       }
 
       toast({ title: "Journaliste retiré", description: "L'équipe a été mise à jour." });
       fetchJournalists();
-    } catch (error: any) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      toast({ title: "Erreur", description: (error as Error).message, variant: "destructive" });
     }
   };
 

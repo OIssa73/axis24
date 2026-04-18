@@ -77,7 +77,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     try {
       const match = document.cookie.match(/googtrans=\/fr\/(en|fr)/);
       if (match) return match[1] as Language;
-    } catch (e) {}
+    } catch (e) { /* ignore */ }
     return "fr"; // Par défaut, le site est en Français
   });
 
@@ -96,7 +96,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         if (select) {
           select.dispatchEvent(new Event('change'));
         }
-      } catch (e) {}
+      } catch (e) { /* ignore */ }
     };
 
     // On attend un court instant que la page soit prête avant de déclencher la traduction

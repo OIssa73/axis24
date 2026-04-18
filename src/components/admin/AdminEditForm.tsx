@@ -180,8 +180,8 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
 
       toast({ title: "Modifications enregistrées avec succès !" });
       onSuccess(); // Ferme le formulaire et rafraîchit la liste
-    } catch (err: any) {
-      toast({ title: "Erreur lors de l'enregistrement", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      toast({ title: "Erreur lors de l'enregistrement", description: (err as Error).message, variant: "destructive" });
     } finally {
       setSaving(false);
       setProgress(0);

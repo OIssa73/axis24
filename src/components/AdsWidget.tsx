@@ -64,7 +64,7 @@ const AdsWidget = () => {
         .maybeSingle();
 
       if (data && data.value) {
-        const val = data.value as any;
+        const val = data.value as { banners?: AdBanner[], banner?: AdBanner, partners?: Partner[], showCta?: boolean };
         
         // Gestion de la liste des bannières (compatibilité ancien/nouveau format)
         let loadedBanners: AdBanner[] = [];
@@ -75,7 +75,7 @@ const AdsWidget = () => {
         }
 
         // Nettoyage et activation des partenaires
-        const partners = (val.partners || []).map((p: any) => ({ ...p, enabled: p.enabled !== false }));
+        const partners = (val.partners || []).map((p: Partner) => ({ ...p, enabled: p.enabled !== false }));
         setConfig({ banners: loadedBanners, partners, showCta: val.showCta !== false });
       }
       setLoading(false);
@@ -92,7 +92,7 @@ const AdsWidget = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings", filter: "key=eq.ads_config" },
         (payload) => {
           if (payload.new && "value" in payload.new) {
-            const val = payload.new.value as any;
+            const val = payload.new.value as { banners?: AdBanner[], banner?: AdBanner, partners?: Partner[], showCta?: boolean };
             const banners = Array.isArray(val.banners) ? val.banners : (val.banner ? [val.banner] : []);
             setConfig({ banners, partners: val.partners || [], showCta: val.showCta !== false });
           }

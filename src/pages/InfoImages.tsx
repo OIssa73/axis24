@@ -59,7 +59,7 @@ const InfoImages = () => {
         
         // Extraction dynamique des catégories présentes dans les données pour créer les filtres
         const catNames = new Set<string>();
-        data.forEach((item: any) => {
+        (data as unknown as ImageContent[]).forEach((item) => {
           if (item.categories?.name) catNames.add(item.categories.name);
         });
         setCategories(["Tout", ...Array.from(catNames)]);

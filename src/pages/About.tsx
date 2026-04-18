@@ -6,13 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Info, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const About = () => {
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  // Valeur par défaut
-  const defaultContent = `
+// Valeur par défaut extraite du composant pour éviter les avertissements de dépendances (ESLint)
+const defaultContent = `
 ## À propos de AXIS24 MEDIA GROUPE
 
 AXIS24 MEDIA GROUPE est un média digital indépendant dédié à l’information locale, sociale et accessible au Cameroun.
@@ -69,6 +64,11 @@ Nous nous engageons à :
 * Mettre en avant des sujets utiles et concrets
 * Respecter une neutralité dans le traitement de l’information
   `;
+
+const About = () => {
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchContent = async () => {
