@@ -8,8 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
 // Importation du composant de barre de progression
 import { Progress } from "@/components/ui/progress";
-// Importation du recadreur d'image
 import ImageCropper from "./ImageCropper";
+import { getWatermarkConfig, applyWatermarkToImage } from "@/utils/watermarkUtils";
+import type { WatermarkConfig } from "./AdminWatermark";
 
 // Structure d'une Catégorie dans le code
 interface Category {
@@ -40,6 +41,11 @@ const AdminUpload = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Pour le recadreur
   const [cropTarget, setCropTarget] = useState<"file" | "thumbnail" | null>(null);
+  
+  // Nouveaux états pour le filigrane
+  const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig | null>(null);
+  const [applyWatermark, setApplyWatermark] = useState(true);
+
   const { toast } = useToast();
 
   /**
@@ -50,7 +56,13 @@ const AdminUpload = () => {
       const { data } = await supabase.from("categories").select("*");
       if (data) setCategories(data as Category[]);
     };
+    const fetchWatermark = async () => {
+      const config = await getWatermarkConfig();
+      setWatermarkConfig(config);
+      setApplyWatermark(config ? true : false);
+    };
     fetchCategories();
+    fetchWatermark();
   }, []);
 
   /**
@@ -138,9 +150,14 @@ const AdminUpload = () => {
 
       // 1. On envoie le fichier principal si il y en a un
       if (file) {
-        const ext = file.name.split(".").pop();
+        let fileToUpload = file;
+        // Application du filigrane si c'est une publication d'image pure (pas thumbnail)
+        if (type === "image" && applyWatermark && watermarkConfig && file.type.startsWith("image/")) {
+           fileToUpload = await applyWatermarkToImage(file, watermarkConfig);
+        }
+        const ext = fileToUpload.name.split(".").pop();
         const path = `${type}/${Date.now()}.${ext}`;
-        fileUrl = await uploadFile(file, path);
+        fileUrl = await uploadFile(fileToUpload, path);
       }
 
       // 2. On envoie la miniature si il y en a une
@@ -305,9 +322,36 @@ const AdminUpload = () => {
           </label>
           
           {file && file.type.startsWith("image/") && (
-            <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border object-contain">
-              <img src={URL.createObjectURL(file)} alt="Aperçu" className="w-full h-full object-cover" />
-              <button type="button" onClick={() => setFile(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black">X</button>
+            <div className="mb-4">
+              <div className="relative w-full aspect-video bg-black/5 rounded-lg overflow-hidden border border-border flex items-center justify-center">
+                <img src={URL.createObjectURL(file)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
+                
+                {/* APERÇU FILIGRANE */}
+                {applyWatermark && watermarkConfig?.logoUrl && (
+                  <img 
+                    src={watermarkConfig.logoUrl} 
+                    alt="Watermark" 
+                    className="absolute pointer-events-none drop-shadow-md"
+                    style={{
+                      width: `${watermarkConfig.size}%`,
+                      opacity: watermarkConfig.opacity / 100,
+                      top: watermarkConfig.position.includes('top') ? '3%' : 'auto',
+                      bottom: watermarkConfig.position.includes('bottom') ? '3%' : 'auto',
+                      left: watermarkConfig.position.includes('left') ? '3%' : 'auto',
+                      right: watermarkConfig.position.includes('right') ? '3%' : 'auto',
+                    }}
+                  />
+                )}
+
+                <button type="button" onClick={() => setFile(null)} className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded hover:bg-black z-20">X</button>
+              </div>
+
+              {watermarkConfig && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                  <input type="checkbox" id="applyWatermark" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
+                  <label htmlFor="applyWatermark" className="text-[11px] font-bold uppercase tracking-widest text-primary cursor-pointer w-full select-none">Appliquer le logo en filigrane (Aperçu ci-dessus)</label>
+                </div>
+              )}
             </div>
           )}
 

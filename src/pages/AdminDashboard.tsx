@@ -17,6 +17,7 @@ import AdminJournalists from "@/components/admin/AdminJournalists";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminAds from "@/components/admin/AdminAds";
 import AdminAbout from "@/components/admin/AdminAbout"; // Nouveau composant
+import AdminWatermark from "@/components/admin/AdminWatermark";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Définition des onglets disponibles dans le menu de gauche
@@ -28,6 +29,7 @@ const tabs = [
   { id: "journalists", label: "Journalistes", icon: Users },
   { id: "about", label: "À Propos", icon: Users }, // Nouvel onglet (On réutilise l'icône Users ou une autre si dispo, ou Info)
   { id: "ads", label: "Publicités", icon: Megaphone },
+  { id: "watermark", label: "Filigrane", icon: Settings },
   { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
@@ -162,6 +164,7 @@ const AdminDashboard = () => {
           {activeTab === "journalists" && <AdminJournalists />}
           {activeTab === "about" && <AdminAbout />}
           {activeTab === "ads" && <AdminAds />}
+          {activeTab === "watermark" && <AdminWatermark />}
           {activeTab === "settings" && <AdminSettings />}
         </main>
       </div>

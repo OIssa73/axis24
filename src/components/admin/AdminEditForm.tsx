@@ -8,8 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Save, X, Upload } from "lucide-react";
 // Importation du composant de barre de progression
 import { Progress } from "@/components/ui/progress";
-// Importation de l'outil de recadrage d'image
 import ImageCropper from "./ImageCropper";
+import { getWatermarkConfig, applyWatermarkToImage } from "@/utils/watermarkUtils";
+import type { WatermarkConfig } from "./AdminWatermark";
 
 // Structure d'une Catégorie
 interface Category {
@@ -52,6 +53,11 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
   const [loading, setLoading] = useState(true); // Chargement des données au début
   const [saving, setSaving] = useState(false); // Pendant l'enregistrement
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // Nouveaux états pour le filigrane
+  const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig | null>(null);
+  const [applyWatermark, setApplyWatermark] = useState(true);
+
   const { toast } = useToast();
 
   /**
@@ -81,6 +87,12 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         setThumbnailUrl(contentData.thumbnail_url || "");
         setFileUrl(contentData.file_url || "");
       }
+      
+      // 3. Récupérer la conf du watermark
+      const config = await getWatermarkConfig();
+      setWatermarkConfig(config);
+      setApplyWatermark(config ? true : false);
+
       setLoading(false); // Les données sont prêtes
     };
     fetchData();
@@ -152,9 +164,14 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
 
       // Si un nouveau fichier principal a été choisi, on l'envoie
       if (newFile) {
-        const ext = newFile.name.split(".").pop();
+        let fileToUpload = newFile;
+        // Si c'est une image pure et qu'on veut le filigrane
+        if (type === "image" && applyWatermark && watermarkConfig && newFile.type.startsWith("image/")) {
+           fileToUpload = await applyWatermarkToImage(newFile, watermarkConfig);
+        }
+        const ext = fileToUpload.name.split(".").pop();
         const path = `${type}/${Date.now()}.${ext}`;
-        finalFileUrl = await uploadFile(newFile, path);
+        finalFileUrl = await uploadFile(fileToUpload, path);
         setProgress(50);
       }
 
@@ -320,11 +337,37 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
                 className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary"
               />
               {newFile && newFile.type.startsWith("image/") && (
-                <div className="mt-2 relative w-20 h-16 rounded-md overflow-hidden border border-border">
-                  <img src={URL.createObjectURL(newFile)} alt="Aperçu" className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setNewFile(null)} className="absolute top-0.5 right-0.5 bg-black/50 text-white p-0.5 rounded text-[10px] hover:bg-black">X</button>
+                <div className="mt-2 relative w-full aspect-video bg-black/5 rounded-lg overflow-hidden border border-border flex items-center justify-center">
+                  <img src={URL.createObjectURL(newFile)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
+                  
+                  {/* APERÇU FILIGRANE */}
+                  {applyWatermark && watermarkConfig?.logoUrl && (
+                    <img 
+                      src={watermarkConfig.logoUrl} 
+                      alt="Watermark" 
+                      className="absolute pointer-events-none drop-shadow-md"
+                      style={{
+                        width: `${watermarkConfig.size}%`,
+                        opacity: watermarkConfig.opacity / 100,
+                        top: watermarkConfig.position.includes('top') ? '3%' : 'auto',
+                        bottom: watermarkConfig.position.includes('bottom') ? '3%' : 'auto',
+                        left: watermarkConfig.position.includes('left') ? '3%' : 'auto',
+                        right: watermarkConfig.position.includes('right') ? '3%' : 'auto',
+                      }}
+                    />
+                  )}
+
+                  <button type="button" onClick={() => setNewFile(null)} className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded text-[10px] hover:bg-black z-20">X</button>
                 </div>
               )}
+
+              {newFile && newFile.type.startsWith("image/") && watermarkConfig && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                  <input type="checkbox" id="applyWatermarkEdit" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
+                  <label htmlFor="applyWatermarkEdit" className="text-[11px] font-bold uppercase tracking-widest text-primary cursor-pointer w-full select-none">Incruster le logo (Aperçu)</label>
+                </div>
+              )}
+
               {fileUrl && !newFile && <p className="text-[10px] text-primary/70 truncate px-2 italic mt-1">Fichier actif : {fileUrl.split('/').pop()}</p>}
             </div>
 

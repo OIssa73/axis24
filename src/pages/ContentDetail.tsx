@@ -12,6 +12,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 // Importation de l'outil de notification (Toast)
 import { useToast } from "@/hooks/use-toast";
+import { getWatermarkConfig } from "@/utils/watermarkUtils";
+import type { WatermarkConfig } from "@/components/admin/AdminWatermark";
 
 /** Structure d'un contenu récupéré en base de données */
 interface Content {
@@ -48,6 +50,7 @@ const ContentDetail = () => {
   }
   const [activeBanners, setActiveBanners] = useState<Banner[]>([]);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [watermarkConfig, setWatermarkConfig] = useState<WatermarkConfig | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -92,8 +95,14 @@ const ContentDetail = () => {
       }
     };
 
+    const fetchWatermark = async () => {
+      const config = await getWatermarkConfig();
+      setWatermarkConfig(config);
+    };
+
     fetchContent();
     fetchAd();
+    fetchWatermark();
   }, [id]);
 
   /**
@@ -186,7 +195,27 @@ const ContentDetail = () => {
           >
             {/* Si c'est une vidéo */}
             {content.type === "video" && content.file_url ? (
-              <video src={content.file_url} controls className="w-full h-full object-contain bg-black rounded-[2rem]" />
+              <div className="relative w-full h-full flex items-center justify-center bg-black">
+                <video src={content.file_url} controls className="w-full h-full object-contain rounded-[2rem]" />
+                
+                {/* Overlay Filigrane TV */}
+                {watermarkConfig?.logoUrl && watermarkConfig.enabled && (
+                  <img 
+                    src={watermarkConfig.logoUrl} 
+                    alt="Watermark" 
+                    className="absolute pointer-events-none drop-shadow-md z-10"
+                    style={{
+                      width: `${watermarkConfig.size}%`,
+                      maxWidth: '200px',
+                      opacity: watermarkConfig.opacity / 100,
+                      top: watermarkConfig.position.includes('top') ? '5%' : 'auto',
+                      bottom: watermarkConfig.position.includes('bottom') ? '12%' : 'auto', // 12% pour esquiver la barre de lecture!
+                      left: watermarkConfig.position.includes('left') ? '3%' : 'auto',
+                      right: watermarkConfig.position.includes('right') ? '3%' : 'auto',
+                    }}
+                  />
+                )}
+              </div>
             ) : 
             /* Si c'est un audio (Podcast) */
             content.type === "audio" && content.file_url ? (
