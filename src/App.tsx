@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"; // Petites bulles de notifica
 import { TooltipProvider } from "@/components/ui/tooltip"; // Gestion des bulles d'aide au survol
 import { LanguageProvider } from "@/context/LanguageContext"; // Fournisseur de langue (FR/EN)
 import { ThemeProvider } from "@/components/theme-provider"; // Fournisseur de thème (Clair/Sombre)
+import { LiveRadioProvider } from "@/context/LiveRadioContext"; // Moteur Audio de la radio en direct
 
 // --- Importations des Pages du site ---
 import Index from "./pages/Index.tsx"; // Page d'accueil
@@ -36,32 +37,34 @@ const App = () => (
     <LanguageProvider>
       <ThemeProvider defaultTheme="dark" storageKey="axis-theme">
         <TooltipProvider>
-          {/* Composants d'affichage des notifications flash */}
-          <Toaster />
-          <Sonner />
-          
-          {/* Configuration du routeur pour gérer les adresses (URLs) du site */}
-          <BrowserRouter>
-            <Routes>
-              {/* Chaque "Route" fait le lien entre une adresse et une page précise */}
-              <Route path="/" element={<Index />} />
-              <Route path="/radio" element={<Radio />} />
-              <Route path="/television" element={<Television />} />
-              <Route path="/actualites" element={<Actualites />} />
-              <Route path="/infos-en-images" element={<InfoImages />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/content/:id" element={<ContentDetail />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/setup" element={<AdminSetup />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/sports" element={<Sports />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/about" element={<About />} />
-              
-              {/* "*" capture toutes les adresses inconnues pour afficher la page 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <LiveRadioProvider>
+            {/* Composants d'affichage des notifications flash */}
+            <Toaster />
+            <Sonner />
+            
+            {/* Configuration du routeur pour gérer les adresses (URLs) du site */}
+            <BrowserRouter>
+              <Routes>
+                {/* Chaque "Route" fait le lien entre une adresse et une page précise */}
+                <Route path="/" element={<Index />} />
+                <Route path="/radio" element={<Radio />} />
+                <Route path="/television" element={<Television />} />
+                <Route path="/actualites" element={<Actualites />} />
+                <Route path="/infos-en-images" element={<InfoImages />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/content/:id" element={<ContentDetail />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/setup" element={<AdminSetup />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/sports" element={<Sports />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/about" element={<About />} />
+                
+                {/* "*" capture toutes les adresses inconnues pour afficher la page 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </LiveRadioProvider>
         </TooltipProvider>
       </ThemeProvider>
     </LanguageProvider>

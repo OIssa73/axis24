@@ -9,6 +9,8 @@ import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useLanguage } from "@/context/LanguageContext";
+import { useLiveRadio } from "@/context/LiveRadioContext";
+import { Loader2, Square } from "lucide-react";
 
 /**
  * Composant NAVBAR (Barre de navigation).
@@ -17,7 +19,8 @@ import { useLanguage } from "@/context/LanguageContext";
 const Navbar = () => {
   // État local pour savoir si le menu mobile est ouvert ou fermé
   const [open, setOpen] = useState(false);
-  const { t } = useLanguage(); // Utilisation de l'outil de traduction
+  const { t, language } = useLanguage(); // Utilisation de l'outil de traduction
+  const { isPlaying, isLoading, togglePlay } = useLiveRadio(); // Moteur radio global
 
   // Liste des liens de navigation principaux pour ordinateur
   const navItems = [
@@ -84,18 +87,55 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-3 text-foreground">
           <ThemeToggle />
           <LanguageSwitcher />
-          <Link to="/radio" className="btn-primary-glow text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold ml-2">
-            <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-            {t("direct")}
-          </Link>
+          
+          <button 
+            onClick={togglePlay}
+            className={`text-xs px-4 py-2 flex items-center gap-2 rounded-lg font-bold ml-2 transition-all ${
+              isPlaying 
+                ? "bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/30 ring-2 ring-green-400/50" 
+                : "btn-primary-glow"
+            }`}
+          >
+            {isLoading ? (
+              <Loader2 size={12} className="animate-spin text-white" />
+            ) : isPlaying ? (
+              <Square size={10} className="fill-white text-white" />
+            ) : (
+              <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
+            )}
+            <span className="pointer-events-none">
+              {isLoading ? "CHARGEMENT..." : isPlaying ? `STOP RFI (${language.toUpperCase()})` : t("direct")}
+            </span>
+          </button>
         </div>
 
         {/* --- CONTROLES MOBILE (Cachés sur ordinateur) --- */}
         <div className="md:hidden flex items-center gap-2">
           <ThemeToggle />
           <LanguageSwitcher />
+          
+          <button 
+            onClick={togglePlay}
+            className={`text-[10px] px-2 py-1.5 flex items-center gap-1.5 rounded-md font-bold transition-all ${
+              isPlaying 
+                ? "bg-green-600 text-white" 
+                : "bg-destructive text-white"
+            }`}
+          >
+            {isLoading ? (
+              <Loader2 size={10} className="animate-spin text-white" />
+            ) : isPlaying ? (
+              <Square size={8} className="fill-white text-white" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            )}
+            <span className="pointer-events-none">
+              {isPlaying ? "STOP" : t("direct")}
+            </span>
+          </button>
+
           <button
-            className="text-foreground p-1"
+            className="text-foreground p-1 ml-1"
             onClick={() => setOpen(!open)} // Bascule l'ouverture du menu mobile
           >
             {open ? <X size={24} /> : <Menu size={24} />}
