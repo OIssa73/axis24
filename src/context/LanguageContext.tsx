@@ -23,7 +23,7 @@ const translations: Translations = {
   journalistes: { fr: "NOS JOURNALISTES", en: "OUR JOURNALISTS" },
   equipe: { fr: "L'Équipe", en: "The Team" },
   hero_subtitle: { fr: "Radio & Télévision — L'information en continu, où que vous soyez.", en: "Radio & TV — Non-stop information, wherever you are." },
-  radio_live: { fr: "Radio en direct", en: "Live Radio" },
+  radio_live: { fr: "Radio & Podcasts", en: "Radio & Podcasts" },
   tv_live: { fr: "TV en direct", en: "Live TV" },
   infos_images: { fr: "Infos en images", en: "News in Pictures" },
   le_mag: { fr: "LE MAG AXIS24", en: "AXIS24 MAG" },

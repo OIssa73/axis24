@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 // Importation de l'outil de traduction
 import { useLanguage } from "@/context/LanguageContext";
+import { useLiveRadio } from "@/context/LiveRadioContext";
+import { Loader2 } from "lucide-react";
 
 /** Structure d'un Podcast (contenu audio) récupéré en BDD */
 interface PodcastContent {
@@ -42,6 +44,7 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
   const [isPlaying, setIsPlaying] = useState(false); // État de lecture (lecture/pause)
   const [activeTab, setActiveTab] = useState("Tous"); // Filtre de catégorie
   const { t } = useLanguage();
+  const { isPlaying: isLivePlaying, isLoading: isLiveLoading, togglePlay: toggleLivePlay } = useLiveRadio(); // API Radio Live Globale
 
   /**
    * Récupère la liste des podcasts publiés.
@@ -110,7 +113,62 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
           <p className="text-muted-foreground max-w-2xl mx-auto mt-4 font-medium opacity-80">{t(subtitle)}</p>
         </motion.div>
 
-        {/* --- LECTEUR PRINCIPAL (Le gros bloc en haut) --- */}
+        {/* --- LECTEUR RFI DIRECT (Nouveau widget magistral) --- */}
+        <div className={`glass-card mb-12 border-primary/30 shadow-2xl rounded-[2rem] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto overflow-hidden relative transition-all duration-700 ${isLivePlaying ? 'bg-gradient-to-br from-green-900/40 to-background shadow-green-500/10' : 'bg-gradient-to-r from-primary/10 to-transparent'}`}>
+           <div className={`absolute top-0 right-0 w-64 h-64 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none transition-colors duration-1000 ${isLivePlaying ? 'bg-green-500/20' : 'bg-primary/20'}`} />
+           
+           <div className="flex items-center gap-6 z-10 w-full md:w-auto">
+             <button
+               onClick={toggleLivePlay}
+               className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shrink-0 shadow-lg ${
+                 isLivePlaying 
+                 ? "bg-green-500 hover:bg-green-600 shadow-green-500/30 scale-105" 
+                 : "bg-primary hover:bg-primary/80 shadow-primary/30"
+               }`}
+             >
+               {isLiveLoading ? (
+                 <Loader2 size={24} className="animate-spin text-white" />
+               ) : isLivePlaying ? (
+                 <div className="flex items-end gap-[3px] h-6">
+                    <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "0ms" }}></div>
+                    <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "200ms" }}></div>
+                    <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "400ms" }}></div>
+                    <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "150ms" }}></div>
+                 </div>
+               ) : (
+                 <Play size={24} className="text-white ml-1 fill-current" />
+               )}
+             </button>
+             
+             <div>
+               <div className="flex items-center gap-2 mb-1">
+                 <span className={`w-2 h-2 rounded-full animate-pulse ${isLivePlaying ? 'bg-green-500' : 'bg-destructive'}`} />
+                 <span className={`text-[10px] uppercase font-bold tracking-[0.3em] ${isLivePlaying ? 'text-green-500' : 'text-destructive'}`}>
+                   Émission en Direct
+                 </span>
+               </div>
+               <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground tracking-wide">
+                 RFI Radio Monde
+               </h3>
+               <p className="text-xs text-muted-foreground opacity-80 max-w-sm line-clamp-2 mt-1">
+                 {isLivePlaying ? "Vous écoutez actuellement le flux radio international." : "Démarrez l'information en continu, où que vous soyez."}
+               </p>
+             </div>
+           </div>
+           
+           {/* Visualizer droit animé contextuel */}
+           <div className={`hidden md:flex items-center gap-1.5 h-12 z-10 transition-opacity duration-700 ${isLivePlaying ? 'opacity-100' : 'opacity-20'}`}>
+               {[1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4, 3, 2, 1].map((h, i) => (
+                 <div 
+                   key={i} 
+                   className={`w-2 rounded-full transition-all duration-300 ${isLivePlaying ? "bg-green-500/50 animate-pulse" : "bg-primary/50 h-2"}`} 
+                   style={{ height: isLivePlaying ? `${h * 8}px` : "8px", animationDelay: `${i * 0.05}s` }}
+                 />
+               ))}
+           </div>
+        </div>
+
+        {/* --- LECTEUR DE PODCAST (Le gros bloc en haut) --- */}
         <div className="glass-card p-8 md:p-10 max-w-3xl mx-auto mb-20 border-primary/20 bg-primary/5 backdrop-blur-3xl shadow-2xl shadow-primary/5 rounded-[2.5rem]">
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Bouton Play/Pause massif */}
