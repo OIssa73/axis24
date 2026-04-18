@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "./LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,8 +38,8 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   }, [language]);
 
   // Assistant pour récupérer l'URL courante selon la langue et l'index de secours
-  const getActiveStreamArray = () => languageRef.current === "en" ? STREAMS_EN : STREAMS_FR;
-  const getActiveStreamUrl = () => getActiveStreamArray()[streamIndex.current];
+  const getActiveStreamArray = useCallback(() => languageRef.current === "en" ? STREAMS_EN : STREAMS_FR, []);
+  const getActiveStreamUrl = useCallback(() => getActiveStreamArray()[streamIndex.current], [getActiveStreamArray]);
 
   // Initialisation unique de l'objet Audio sans le monter dans le DOM
   useEffect(() => {
@@ -119,7 +119,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
         }
       }
     }
-  }, [language, isPlaying]);
+  }, [language, isPlaying, getActiveStreamUrl]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -153,6 +153,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLiveRadio = () => {
   const context = useContext(LiveRadioContext);
   if (context === undefined) {

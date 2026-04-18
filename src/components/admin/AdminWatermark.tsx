@@ -74,7 +74,7 @@ const AdminWatermark = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      let finalConfig = { ...config };
+      const finalConfig = { ...config };
 
       if (newLogoFile) {
         const logoUrl = await uploadLogo(newLogoFile);
@@ -83,7 +83,8 @@ const AdminWatermark = () => {
 
       const { error } = await supabase
         .from("site_settings")
-        .upsert({ key: "watermark_config", value: finalConfig as unknown as Record<string, unknown> });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert({ key: "watermark_config", value: finalConfig as any });
 
       if (error) throw error;
 
@@ -186,7 +187,7 @@ const AdminWatermark = () => {
                   ].map(pos => (
                     <button
                       key={pos.id}
-                      onClick={() => setConfig({ ...config, position: pos.id as any })}
+                      onClick={() => setConfig({ ...config, position: pos.id as WatermarkConfig["position"] })}
                       className={`py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest border transition-all ${
                         config.position === pos.id 
                           ? "bg-primary text-white border-primary shadow-md shadow-primary/20" 

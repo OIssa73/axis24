@@ -162,9 +162,13 @@ const AdminUpload = () => {
 
       // 2. On envoie la miniature si il y en a une
       if (thumbnail) {
-        const ext = thumbnail.name.split(".").pop();
+        let thumbnailToUpload = thumbnail;
+        if (applyWatermark && watermarkConfig && thumbnail.type.startsWith("image/")) {
+           thumbnailToUpload = await applyWatermarkToImage(thumbnail, watermarkConfig);
+        }
+        const ext = thumbnailToUpload.name.split(".").pop();
         const path = `thumbnails/${Date.now()}.${ext}`;
-        thumbnailUrl = await uploadFile(thumbnail, path);
+        thumbnailUrl = await uploadFile(thumbnailToUpload, path);
       }
 
       // 3. On récupère l'identifiant de la personne connectée (l'admin)
@@ -216,6 +220,8 @@ const AdminUpload = () => {
     if (type === "video") return c.type === "tv";
     if (type === "article") return c.type === "article";
     if (type === "image") return c.type === "image";
+    if (type === "sport") return c.type === "sport";
+    if (type === "job") return c.type === "job";
     return true;
   });
 

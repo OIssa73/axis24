@@ -1,5 +1,5 @@
 // Importation des outils de React pour gérer les formulaires et les effets
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 // Importation de la connexion à la base de données
 import { supabase } from "@/integrations/supabase/client";
 // Importation des icônes d'action (Plus, Supprimer, Upload, Utilisateur, Loader, Modifier)
@@ -40,7 +40,7 @@ const AdminJournalists = () => {
    * Récupère la liste des journalistes et leurs biographies.
    * Note : Les bios sont stockées dans 'site_settings' pour plus de flexibilité.
    */
-  const fetchJournalists = async () => {
+  const fetchJournalists = useCallback(async () => {
     try {
       // 1. On récupère les journalistes (Nom + Photo)
       const { data: journalistsData, error: jError } = await supabase.from("journalists").select("*").order("created_at", { ascending: false });
@@ -66,12 +66,12 @@ const AdminJournalists = () => {
     } catch (error: unknown) {
       toast({ title: "Erreur de chargement", description: (error as Error).message, variant: "destructive" });
     }
-  };
+  }, [toast]);
 
   /**
    * Chargement initial.
    */
-  useEffect(() => { fetchJournalists(); }, []);
+  useEffect(() => { fetchJournalists(); }, [fetchJournalists]);
 
   /**
    * Déclenché quand l'utilisateur choisit une photo. 
@@ -161,7 +161,8 @@ const AdminJournalists = () => {
 
       await supabase
         .from("site_settings")
-        .upsert({ key: "journalists_bios", value: updatedBios as unknown as Record<string, unknown> });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert({ key: "journalists_bios", value: updatedBios as any });
 
       toast({ 
         title: editingId ? "Journaliste modifié" : "Journaliste ajouté !", 
@@ -196,7 +197,8 @@ const AdminJournalists = () => {
       if (settingsData?.value) {
         const bios = settingsData.value as Record<string, string>;
         delete bios[id];
-        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as unknown as Record<string, unknown> });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await supabase.from("site_settings").upsert({ key: "journalists_bios", value: bios as any });
       }
 
       toast({ title: "Journaliste retiré", description: "L'équipe a été mise à jour." });

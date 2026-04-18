@@ -56,7 +56,11 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
         // --- FILTRAGE DE SÉCURITÉ ---
         // On exclut les articles qui sont marqués "job" ou "sport" car ils ont leurs propres sections
         const newsArticles = (data as unknown as Article[]).filter(
-          a => !(a.tags && (a.tags.includes("job") || a.tags.includes("sport")))
+          a => {
+            const isSport = a.tags?.includes("sport") || a.categories?.name?.toLowerCase().includes("sport");
+            const isJob = a.tags?.includes("job") || a.categories?.name?.toLowerCase().includes("job");
+            return !(isSport || isJob);
+          }
         );
         setArticles(newsArticles as unknown as Article[]);
       }

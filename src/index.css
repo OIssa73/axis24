@@ -184,6 +184,22 @@ body {
   box-shadow: none !important;
 }
 
+/* Cache totalement le bouton flottant de Google et ses nouveaux widgets */
+.VIpgJd-Zvi9od-aZ2wEe-wOHMyf,
+.VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc,
+.VIpgJd-Zvi9od-aZ2wEe-OiiCO,
+.VIpgJd-Zvi9od-ORHb-OEVmcd,
+.goog-te-gadget-icon,
+.goog-te-gadget-simple,
+img.VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* --- OPTIMISATIONS MOBILES STRICTES --- */
 @media (max-width: 768px) {
   /* 1. Désactivation pure et dure des flous coûteux (Glassmorphism) pour fluidifier le défilement */
