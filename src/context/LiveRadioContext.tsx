@@ -103,7 +103,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       const activeStream = getActiveStreamUrl();
       
       // Si la source est différente de celle en cours
-      if (audioRef.current.src !== activeStream) {
+      if (!audioRef.current.src || !audioRef.current.src.includes(activeStream)) {
         const wasPlaying = isPlaying;
         audioRef.current.src = activeStream;
         audioRef.current.load();
@@ -131,7 +131,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       
       // Assurer que la source est correcte avant de lancer
       const activeStream = getActiveStreamUrl();
-      if (audioRef.current.src !== activeStream) {
+      if (!audioRef.current.src || !audioRef.current.src.includes(activeStream)) {
          audioRef.current.src = activeStream;
          audioRef.current.load();
       }

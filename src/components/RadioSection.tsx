@@ -43,7 +43,7 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
   const [currentAudio, setCurrentAudio] = useState<PodcastContent | null>(null); // Podcast actuellement chargé dans le lecteur
   const [isPlaying, setIsPlaying] = useState(false); // État de lecture (lecture/pause)
   const [activeTab, setActiveTab] = useState("Tous"); // Filtre de catégorie
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isPlaying: isLivePlaying, isLoading: isLiveLoading, togglePlay: toggleLivePlay } = useLiveRadio(); // API Radio Live Globale
 
   /**
@@ -148,7 +148,7 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
                  </span>
                </div>
                <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground tracking-wide">
-                 RFI Radio Monde
+                 {language === "en" ? "RFI Radio English" : "RFI Radio Monde"}
                </h3>
                <p className="text-xs text-muted-foreground opacity-80 max-w-sm line-clamp-2 mt-1">
                  {isLivePlaying ? "Vous écoutez actuellement le flux radio international." : "Démarrez l'information en continu, où que vous soyez."}
