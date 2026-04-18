@@ -29,10 +29,16 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamIndex = useRef(0); // Pour retenir quel flux de secours est en cours
   const { language } = useLanguage();
+  const languageRef = useRef(language);
   const { toast } = useToast();
 
+  // Mise à jour de la référence de langue magique
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
   // Assistant pour récupérer l'URL courante selon la langue et l'index de secours
-  const getActiveStreamArray = () => language === "en" ? STREAMS_EN : STREAMS_FR;
+  const getActiveStreamArray = () => languageRef.current === "en" ? STREAMS_EN : STREAMS_FR;
   const getActiveStreamUrl = () => getActiveStreamArray()[streamIndex.current];
 
   // Initialisation unique de l'objet Audio sans le monter dans le DOM
@@ -55,7 +61,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       
       audioRef.current.addEventListener("error", () => {
         // CASCADE DE SECOURS: Si le flux actuel échoue
-        const activeArray = language === "en" ? STREAMS_EN : STREAMS_FR;
+        const activeArray = languageRef.current === "en" ? STREAMS_EN : STREAMS_FR;
         const maxIndex = activeArray.length - 1;
         
         if (streamIndex.current < maxIndex) {

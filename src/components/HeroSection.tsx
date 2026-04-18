@@ -16,7 +16,8 @@ const HeroSection = () => {
   return (
     <section
       id="accueil"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden transform-gpu will-change-transform"
+      style={{ transform: "translateZ(0)" }}
     >
       {/* --- IMAGE DE FOND --- */}
       <div className="absolute inset-0">
@@ -58,7 +59,7 @@ const HeroSection = () => {
         >
           <Link
             to="/radio"
-            className="btn-primary-glow flex items-center gap-3 text-lg px-8 py-4"
+            className="btn-primary-glow flex items-center gap-3 text-lg px-8 py-4 sm:shadow-glow shadow-none"
           >
             <Radio size={20} />
             {t("radio_live")}

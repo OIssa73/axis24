@@ -21,7 +21,7 @@ const LanguageSwitcher = () => {
         className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/30 hover:bg-muted border border-border/50 text-xs font-bold uppercase tracking-widest transition-all"
       >
         <Globe size={14} className="text-primary" />
-        <span>{currentLang.code}</span>
+        <span className="notranslate">{currentLang.code}</span>
         <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 

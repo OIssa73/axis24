@@ -48,7 +48,7 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         {/* Logo de l'application (cliquable pour revenir à l'accueil) */}
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-display text-2xl tracking-widest text-foreground">
+          <span className="font-display text-2xl tracking-widest text-foreground whitespace-nowrap">
             AXIS<span className="text-primary">24</span>
           </span>
           <span className="hidden sm:block text-xs text-muted-foreground uppercase tracking-widest">
