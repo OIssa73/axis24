@@ -338,24 +338,26 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
               />
               {newFile && newFile.type.startsWith("image/") && (
                 <div className="mt-2 relative w-full aspect-video bg-black/5 rounded-lg overflow-hidden border border-border flex items-center justify-center">
-                  <img src={URL.createObjectURL(newFile)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
-                  
-                  {/* APERÇU FILIGRANE */}
-                  {applyWatermark && watermarkConfig?.logoUrl && (
-                    <img 
-                      src={watermarkConfig.logoUrl} 
-                      alt="Watermark" 
-                      className="absolute pointer-events-none drop-shadow-md"
-                      style={{
-                        width: `${watermarkConfig.size}%`,
-                        opacity: watermarkConfig.opacity / 100,
-                        top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
-                        bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
-                        left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
-                        right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
-                      }}
-                    />
-                  )}
+                  <div className="relative inline-flex max-w-full h-full">
+                    <img src={URL.createObjectURL(newFile)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
+                    
+                    {/* APERÇU FILIGRANE */}
+                    {applyWatermark && watermarkConfig?.logoUrl && (
+                      <img 
+                        src={watermarkConfig.logoUrl} 
+                        alt="Watermark" 
+                        className="absolute pointer-events-none drop-shadow-md"
+                        style={{
+                          width: `${watermarkConfig.size}%`,
+                          opacity: watermarkConfig.opacity / 100,
+                          top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                          bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                          left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                          right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                        }}
+                      />
+                    )}
+                  </div>
 
                   <button type="button" onClick={() => setNewFile(null)} className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded text-[10px] hover:bg-black z-20">X</button>
                 </div>
