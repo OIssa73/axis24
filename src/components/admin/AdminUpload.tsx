@@ -39,6 +39,7 @@ const AdminUpload = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Pour le recadreur
+  const [cropTarget, setCropTarget] = useState<"file" | "thumbnail" | null>(null);
   const { toast } = useToast();
 
   /**
@@ -70,10 +71,11 @@ const AdminUpload = () => {
         return;
       }
       
-      // Si c'est une image (et pour la miniature particulièrement), on peut utiliser le cropper
-      if (selectedFile.type.startsWith("image/") && setFileFn === setThumbnail) {
+      // Si c'est une image (et pour la miniature ou le fichier principal), on utilise le cropper
+      if (selectedFile.type.startsWith("image/") && (setFileFn === setThumbnail || setFileFn === setFile)) {
         const reader = new FileReader();
         reader.addEventListener("load", () => {
+          setCropTarget(setFileFn === setThumbnail ? "thumbnail" : "file");
           setCropImageSrc(reader.result?.toString() || "");
         });
         reader.readAsDataURL(selectedFile);
@@ -88,9 +90,14 @@ const AdminUpload = () => {
    * Validation de l'image recadrée
    */
   const handleCropSubmit = (croppedBlob: Blob) => {
-    const croppedFile = new File([croppedBlob], `thumbnail-${Date.now()}.jpg`, { type: "image/jpeg" });
-    setThumbnail(croppedFile);
+    const croppedFile = new File([croppedBlob], `${cropTarget}-${Date.now()}.jpg`, { type: "image/jpeg" });
+    if (cropTarget === "thumbnail") {
+      setThumbnail(croppedFile);
+    } else {
+      setFile(croppedFile);
+    }
     setCropImageSrc(null);
+    setCropTarget(null);
   };
 
   /**
@@ -201,7 +208,7 @@ const AdminUpload = () => {
       <ImageCropper 
         imageSrc={cropImageSrc} 
         onCropSubmit={handleCropSubmit} 
-        onCancel={() => setCropImageSrc(null)} 
+        onCancel={() => { setCropImageSrc(null); setCropTarget(null); }} 
       />
     )}
     
@@ -296,6 +303,14 @@ const AdminUpload = () => {
           <label className="text-sm text-muted-foreground mb-1 block">
             Fichier {type === "audio" ? "audio" : type === "video" ? "vidéo" : "image"} <span className="text-primary font-bold">(Max 50Mo)</span>
           </label>
+          
+          {file && file.type.startsWith("image/") && (
+            <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border object-contain">
+              <img src={URL.createObjectURL(file)} alt="Aperçu" className="w-full h-full object-cover" />
+              <button type="button" onClick={() => setFile(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black">X</button>
+            </div>
+          )}
+
           <input
             type="file"
             accept={type === "audio" ? "audio/*" : type === "video" ? "video/*" : "image/*"}

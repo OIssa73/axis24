@@ -45,6 +45,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
   const [newFile, setNewFile] = useState<File | null>(null);
   const [newThumbnail, setNewThumbnail] = useState<File | null>(null);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null); // Pour le recadrage
+  const [cropTarget, setCropTarget] = useState<"file" | "thumbnail" | null>(null); // Savoir quoi recadrer
   
   // --- ÉTATS DE CHARGEMENT ET RÉUSSITE ---
   const [progress, setProgress] = useState(0);
@@ -98,10 +99,11 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         return;
       }
       
-      // Si c'est une image pour la miniature, on utilise le recadreur
-      if (selectedFile.type.startsWith("image/") && setFileFn === setNewThumbnail) {
+      // Si c'est une image (miniature OU fichier principal de type image), on utilise le recadreur
+      if (selectedFile.type.startsWith("image/") && (setFileFn === setNewThumbnail || setFileFn === setNewFile)) {
         const reader = new FileReader();
         reader.addEventListener("load", () => {
+          setCropTarget(setFileFn === setNewThumbnail ? "thumbnail" : "file");
           setCropImageSrc(reader.result?.toString() || "");
         });
         reader.readAsDataURL(selectedFile);
@@ -116,9 +118,14 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
    * Action appelée après le recadrage
    */
   const handleCropSubmit = (croppedBlob: Blob) => {
-    const croppedFile = new File([croppedBlob], `thumbnail-${Date.now()}.jpg`, { type: "image/jpeg" });
-    setNewThumbnail(croppedFile);
+    const croppedFile = new File([croppedBlob], `${cropTarget}-${Date.now()}.jpg`, { type: "image/jpeg" });
+    if (cropTarget === "thumbnail") {
+      setNewThumbnail(croppedFile);
+    } else {
+      setNewFile(croppedFile);
+    }
     setCropImageSrc(null);
+    setCropTarget(null);
   };
 
   /**
@@ -207,7 +214,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
         <ImageCropper 
           imageSrc={cropImageSrc} 
           onCropSubmit={handleCropSubmit} 
-          onCancel={() => setCropImageSrc(null)} 
+          onCancel={() => { setCropImageSrc(null); setCropTarget(null); }} 
         />
       )}
       
@@ -312,7 +319,13 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
                 onChange={(e) => handleFileChange(e, setNewFile)}
                 className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary"
               />
-              {fileUrl && !newFile && <p className="text-[10px] text-primary/70 truncate px-2 italic">Fichier actif : {fileUrl.split('/').pop()}</p>}
+              {newFile && newFile.type.startsWith("image/") && (
+                <div className="mt-2 relative w-20 h-16 rounded-md overflow-hidden border border-border">
+                  <img src={URL.createObjectURL(newFile)} alt="Aperçu" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => setNewFile(null)} className="absolute top-0.5 right-0.5 bg-black/50 text-white p-0.5 rounded text-[10px] hover:bg-black">X</button>
+                </div>
+              )}
+              {fileUrl && !newFile && <p className="text-[10px] text-primary/70 truncate px-2 italic mt-1">Fichier actif : {fileUrl.split('/').pop()}</p>}
             </div>
 
             <div className="space-y-2">
