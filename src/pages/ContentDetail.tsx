@@ -208,10 +208,10 @@ const ContentDetail = () => {
                       width: `${watermarkConfig.size}%`,
                       maxWidth: '200px',
                       opacity: watermarkConfig.opacity / 100,
-                      top: watermarkConfig.position.includes('top') ? '5%' : 'auto',
-                      bottom: watermarkConfig.position.includes('bottom') ? '12%' : 'auto', // 12% pour esquiver la barre de lecture!
-                      left: watermarkConfig.position.includes('left') ? '3%' : 'auto',
-                      right: watermarkConfig.position.includes('right') ? '3%' : 'auto',
+                      top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                      bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto', 
+                      left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                      right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
                     }}
                   />
                 )}

@@ -335,10 +335,10 @@ const AdminUpload = () => {
                     style={{
                       width: `${watermarkConfig.size}%`,
                       opacity: watermarkConfig.opacity / 100,
-                      top: watermarkConfig.position.includes('top') ? '3%' : 'auto',
-                      bottom: watermarkConfig.position.includes('bottom') ? '3%' : 'auto',
-                      left: watermarkConfig.position.includes('left') ? '3%' : 'auto',
-                      right: watermarkConfig.position.includes('right') ? '3%' : 'auto',
+                      top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                      bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                      left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                      right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
                     }}
                   />
                 )}

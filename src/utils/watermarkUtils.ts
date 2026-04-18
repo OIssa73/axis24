@@ -67,20 +67,21 @@ export const applyWatermarkToImage = async (originalFile: File, config: Watermar
     const proportion = logoWidth / logoImg.width;
     const logoHeight = logoImg.height * proportion;
 
-    // 3. Calculer la position (Les marges sont proportionnelles à la taille de l'écran, ex: 3%)
-    const margin = canvas.width * 0.03; 
-    let x = margin;
-    let y = margin;
+    // 3. Calculer la position avec marginX et marginY (ou 3% par défaut)
+    const marginX = canvas.width * ((config.marginX ?? 3) / 100);
+    const marginY = canvas.height * ((config.marginY ?? 3) / 100);
+    let x = marginX;
+    let y = marginY;
 
     if (config.position === "top-right") {
-      x = canvas.width - logoWidth - margin;
-      y = margin;
+      x = canvas.width - logoWidth - marginX;
+      y = marginY;
     } else if (config.position === "bottom-left") {
-      x = margin;
-      y = canvas.height - logoHeight - margin;
+      x = marginX;
+      y = canvas.height - logoHeight - marginY;
     } else if (config.position === "bottom-right") {
-      x = canvas.width - logoWidth - margin;
-      y = canvas.height - logoHeight - margin;
+      x = canvas.width - logoWidth - marginX;
+      y = canvas.height - logoHeight - marginY;
     }
 
     // 4. Appliquer de la transparence selon le réglage

@@ -9,6 +9,8 @@ export interface WatermarkConfig {
   position: "top-right" | "top-left" | "bottom-right" | "bottom-left";
   size: number; // percentage (ex: 15 for 15%)
   opacity: number; // 0 to 100
+  marginX: number; // 0 to 20
+  marginY: number; // 0 to 20
 }
 
 const defaultWatermark: WatermarkConfig = {
@@ -17,6 +19,8 @@ const defaultWatermark: WatermarkConfig = {
   position: "top-right",
   size: 15,
   opacity: 90,
+  marginX: 3,
+  marginY: 3,
 };
 
 const AdminWatermark = () => {
@@ -236,6 +240,50 @@ const AdminWatermark = () => {
                 <div className="flex justify-between text-[10px] text-muted-foreground">
                   <span>Transparent (20%)</span>
                   <span>Solide (100%)</span>
+                </div>
+              </div>
+
+              {/* Marge X */}
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />Écartement Horizontal (X)
+                  </label>
+                  <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">{config.marginX ?? 3}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="20" 
+                  value={config.marginX ?? 3} 
+                  onChange={(e) => setConfig({ ...config, marginX: parseInt(e.target.value) })}
+                  className="w-full accent-primary h-2 bg-border rounded-lg appearance-none cursor-pointer" 
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>Collé au bord (0%)</span>
+                  <span>Centré (20%)</span>
+                </div>
+              </div>
+
+              {/* Marge Y */}
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />Écartement Vertical (Y)
+                  </label>
+                  <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">{config.marginY ?? 3}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="20" 
+                  value={config.marginY ?? 3} 
+                  onChange={(e) => setConfig({ ...config, marginY: parseInt(e.target.value) })}
+                  className="w-full accent-primary h-2 bg-border rounded-lg appearance-none cursor-pointer" 
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>Collé au bord (0%)</span>
+                  <span>Vers le centre (20%)</span>
                 </div>
               </div>
 
