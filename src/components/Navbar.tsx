@@ -99,7 +99,12 @@ const Navbar = () => {
             {isLoading ? (
               <Loader2 size={12} className="animate-spin text-white" />
             ) : isPlaying ? (
-              <Square size={10} className="fill-white text-white" />
+              <div className="flex items-end gap-[2px] h-3 mr-1">
+                <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "0ms" }}></div>
+                <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "200ms" }}></div>
+                <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "400ms" }}></div>
+                <div className="w-[3px] bg-white animate-wave rounded-t-sm" style={{ height: "100%", animationDelay: "150ms" }}></div>
+              </div>
             ) : (
               <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
             )}
@@ -125,7 +130,12 @@ const Navbar = () => {
             {isLoading ? (
               <Loader2 size={10} className="animate-spin text-white" />
             ) : isPlaying ? (
-              <Square size={8} className="fill-white text-white" />
+              <div className="flex items-end gap-[1px] h-2.5 mr-0.5">
+                <div className="w-0.5 bg-white animate-wave rounded-t-[1px]" style={{ height: "100%", animationDelay: "0ms" }}></div>
+                <div className="w-0.5 bg-white animate-wave rounded-t-[1px]" style={{ height: "100%", animationDelay: "200ms" }}></div>
+                <div className="w-0.5 bg-white animate-wave rounded-t-[1px]" style={{ height: "100%", animationDelay: "400ms" }}></div>
+                <div className="w-0.5 bg-white animate-wave rounded-t-[1px]" style={{ height: "100%", animationDelay: "150ms" }}></div>
+              </div>
             ) : (
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             )}

@@ -81,11 +81,16 @@ export default {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        wave: {
+          "0%, 100%": { height: "20%" },
+          "50%": { height: "100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-up": "slide-up 0.6s ease-out",
+        "wave": "wave 1.2s ease-in-out infinite",
       },
     },
   },

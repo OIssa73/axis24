@@ -10,17 +10,30 @@ interface LiveRadioContextType {
 
 const LiveRadioContext = createContext<LiveRadioContextType | undefined>(undefined);
 
-// Flux Audio RFI (Radio France Internationale)
-const STREAM_FR = "http://live02.rfi.fr/rfimonde-96k.mp3";
-// Le flux anglais officiel RFI est parfois difficile à isoler, mais celui-ci est aux normes Icecast ou peut tomber sur le flux Europe.
-const STREAM_EN = "http://live02.rfi.fr/rfienanglais-96k.mp3"; 
+// Tableau en cascade des Flux Audio RFI (du plus fiable/rapide pour faible réseau au principal)
+const STREAMS_FR = [
+  "https://rfimonde64k.ice.infomaniak.ch/rfimonde-64.mp3", // Ultra-rapide, 64kbps stable
+  "http://live02.rfi.fr/rfimonde-96k.mp3",                 // Qualité normale
+  "https://rfi-monde.fr.ice.infomaniak.ch/rfi-monde.mp3"   // Miroir
+];
+
+const STREAMS_EN = [
+  "https://rfienanglais64k.ice.infomaniak.ch/rfienanglais-64.mp3", // 64kbps stable English
+  "http://live02.rfi.fr/rfienanglais-96k.mp3",
+  "https://rfi-en-anglais.fr.ice.infomaniak.ch/rfi-en-anglais.mp3"
+];
 
 export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const streamIndex = useRef(0); // Pour retenir quel flux de secours est en cours
   const { language } = useLanguage();
   const { toast } = useToast();
+
+  // Assistant pour récupérer l'URL courante selon la langue et l'index de secours
+  const getActiveStreamArray = () => language === "en" ? STREAMS_EN : STREAMS_FR;
+  const getActiveStreamUrl = () => getActiveStreamArray()[streamIndex.current];
 
   // Initialisation unique de l'objet Audio sans le monter dans le DOM
   useEffect(() => {
@@ -41,13 +54,32 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       audioRef.current.addEventListener("waiting", () => setIsLoading(true));
       
       audioRef.current.addEventListener("error", () => {
-        setIsPlaying(false);
-        setIsLoading(false);
-        toast({ 
-          title: "Erreur de connexion", 
-          description: "Le flux radio en direct est temporairement indisponible.",
-          variant: "destructive"
-        });
+        // CASCADE DE SECOURS: Si le flux actuel échoue
+        const activeArray = language === "en" ? STREAMS_EN : STREAMS_FR;
+        const maxIndex = activeArray.length - 1;
+        
+        if (streamIndex.current < maxIndex) {
+           // On passe au flux de secours suivant
+           streamIndex.current += 1;
+           console.warn(`Basculement sur le flux radio de secours n°${streamIndex.current}`);
+           
+           if (audioRef.current) {
+             audioRef.current.src = activeArray[streamIndex.current];
+             audioRef.current.load();
+             // On tente de relancer la lecture si possible
+             audioRef.current.play().catch(() => {});
+           }
+        } else {
+           // Épuisement de tous les flux de secours
+           setIsPlaying(false);
+           setIsLoading(false);
+           streamIndex.current = 0; // Réinitialisation pour la prochaine tentative manuelle
+           toast({ 
+             title: "Radio RFI Indisponible", 
+             description: "Le serveur radio est bloqué ou inaccessible depuis votre réseau internet actuel.",
+             variant: "destructive"
+           });
+        }
       });
     }
 
@@ -60,7 +92,9 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   // Si on change de langue alors que la radio joue, on met à jour le flux dynamiquement !
   useEffect(() => {
     if (audioRef.current) {
-      const activeStream = language === "en" ? STREAM_EN : STREAM_FR;
+      // A chaque changement de langue, on redémarre l'essai depuis le flux le plus robuste (index 0)
+      streamIndex.current = 0;
+      const activeStream = getActiveStreamUrl();
       
       // Si la source est différente de celle en cours
       if (audioRef.current.src !== activeStream) {
@@ -73,8 +107,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
              playPromise.catch(() => {
-               setIsPlaying(false);
-               setIsLoading(false);
+               // En cas d'échec initial, l'événement "error" prendra le relais pour la cascade de secours
              });
           }
         }
@@ -91,7 +124,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       setIsLoading(true);
       
       // Assurer que la source est correcte avant de lancer
-      const activeStream = language === "en" ? STREAM_EN : STREAM_FR;
+      const activeStream = getActiveStreamUrl();
       if (audioRef.current.src !== activeStream) {
          audioRef.current.src = activeStream;
          audioRef.current.load();
@@ -100,9 +133,8 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((e) => {
-          console.error("Lecture impossible", e);
-          setIsPlaying(false);
-          setIsLoading(false);
+          console.warn("Lecture bloquée ou impossible à lancer directement", e);
+          // On laisse l'événement 'error' s'en occuper et relancer les secours si nécessaire.
         });
       }
     }
