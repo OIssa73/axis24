@@ -1,5 +1,5 @@
-// Importation des outils React pour les états et effets
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // Importation de Framer Motion pour les animations de liste
 import { motion, AnimatePresence } from "framer-motion";
 // Importation des composants globaux
@@ -41,6 +41,7 @@ const InfoImages = () => {
   const [items, setItems] = useState<ImageContent[]>([]); // Liste des images
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>(["Tout"]); // Liste des catégories disponibles
+  const navigate = useNavigate();
 
   /**
    * Récupère toutes les images publiées.
@@ -140,6 +141,7 @@ const InfoImages = () => {
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
+                      onClick={() => navigate(`/content/${article.id}`)}
                       className="glass-card overflow-hidden group cursor-pointer hover:border-primary/40 border-border/50 transition-all shadow-xl shadow-black/5"
                     >
                       {/* Zone Média */}

@@ -199,7 +199,7 @@ const ContentDetail = () => {
               <img 
                 src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
                 alt={content.title} 
-                className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+                className={`w-full h-full transition-transform duration-700 hover:scale-[1.02] ${content.type === "image" ? "object-contain bg-black/95" : "object-cover"}`}
               />
             ) : 
             /* Par défaut (Logo Axis24) */
