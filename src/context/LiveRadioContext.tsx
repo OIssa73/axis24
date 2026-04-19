@@ -28,6 +28,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamIndex = useRef(0); // Pour retenir quel flux de secours est en cours
+  const isIntentionalStop = useRef(false); // Empêche les erreurs fantômes lors de l'arrêt
   const { language } = useLanguage();
   const languageRef = useRef(language);
   const { toast } = useToast();
@@ -79,6 +80,8 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       });
       
       audioRef.current.addEventListener("error", () => {
+        if (isIntentionalStop.current) return; // Ne rien faire si c'est un arrêt volontaire !
+
         // CASCADE DE SECOURS: Si le flux actuel échoue
         const activeArray = languageRef.current === "en" ? STREAMS_EN : STREAMS_FR;
         const maxIndex = activeArray.length - 1;
@@ -144,10 +147,15 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
     if (!audioRef.current) return;
 
     if (isPlaying) {
+      isIntentionalStop.current = true; // On signale que c'est intentionnel
       audioRef.current.pause();
       audioRef.current.src = ""; // DÉCONNEXION TOTALE : Coupe le téléchargement en arrière-plan pour économiser la data
+      audioRef.current.load(); // Vide complètement le tampon
       setIsPlaying(false);
       setIsLoading(false);
+      
+      // On réinitialise la sécurité après un court délai
+      setTimeout(() => { isIntentionalStop.current = false; }, 500);
     } else {
       setIsLoading(true);
       streamIndex.current = 0; // On repart sur le serveur principal
