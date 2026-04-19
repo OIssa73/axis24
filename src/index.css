@@ -163,41 +163,46 @@
   50% { opacity: 0.5; transform: scale(1.5); }
 }
 
-/* Google Translate Overrides */
+/* --- Google Translate Extreme Overrides --- */
 body {
   top: 0 !important;
   position: static !important;
 }
 
-.skiptranslate iframe,
-.goog-te-banner-frame {
+/* On masque absolument toutes les iframes, bannières et widgets flottants */
+.skiptranslate > iframe,
+.goog-te-banner-frame,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-te-spinner-pos {
   display: none !important;
-}
-
-#goog-gt-tt {
-  display: none !important;
+  visibility: hidden !important;
   opacity: 0 !important;
 }
 
+/* Éliminer le surlignement bleu bizarre de google */
 .goog-text-highlight {
   background-color: transparent !important;
   box-shadow: none !important;
 }
 
-/* Cache totalement le bouton flottant de Google et ses nouveaux widgets */
-.VIpgJd-Zvi9od-aZ2wEe-wOHMyf,
-.VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc,
-.VIpgJd-Zvi9od-aZ2wEe-OiiCO,
-.VIpgJd-Zvi9od-ORHb-OEVmcd,
-.goog-te-gadget-icon,
-.goog-te-gadget-simple,
-img.VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc {
+/* Ciblage ultra-agressif du bouton flottant circulaire Google Chrome Translate */
+[class*="VIpgJd-"],
+[class*="goog-te-"],
+#goog-gt- {
   display: none !important;
+  visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  visibility: hidden !important;
+  z-index: -99999 !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* L'élément parent caché qui fait marcher notre menu personnalisé reste caché visuellement au besoin */
+#google_translate_element, 
+.skiptranslate {
+  display: none !important;
 }
 
 /* --- OPTIMISATIONS MOBILES STRICTES --- */
