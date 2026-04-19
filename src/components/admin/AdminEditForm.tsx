@@ -287,7 +287,7 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           {/* Catégorie */}
           <div>
             <label className="text-sm text-muted-foreground mb-1 block">Catégorie</label>
