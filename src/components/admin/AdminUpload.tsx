@@ -279,8 +279,8 @@ const AdminUpload = () => {
         />
       </div>
 
-      {/* Zone de texte longue (Uniquement pour les articles et jobs) */}
-      {(type === "article" || type === "job") && (
+      {/* Zone de texte longue (Uniquement pour les articles, sports et jobs) */}
+      {(type === "article" || type === "job" || type === "sport") && (
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">Contenu complet</label>
           <textarea
@@ -321,10 +321,10 @@ const AdminUpload = () => {
       </div>
 
       {/* Sélection du Fichier Principal (Audio/Vidéo/Image) */}
-      {(type === "audio" || type === "video" || type === "image") && (
+      {(type === "audio" || type === "video" || type === "image" || type === "article" || type === "sport" || type === "job") && (
         <div className="glass-card p-6">
           <label className="text-sm text-muted-foreground mb-1 block">
-            Fichier {type === "audio" ? "audio" : type === "video" ? "vidéo" : "image"} <span className="text-primary font-bold">(Max 50Mo)</span>
+            Fichier principal {type === "audio" ? "(audio)" : type === "video" ? "(vidéo)" : "(image)"} <span className="text-primary font-bold">(Max 50Mo)</span>
           </label>
           
           {file && file.type.startsWith("image/") && (
