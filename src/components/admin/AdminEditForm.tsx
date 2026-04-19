@@ -390,11 +390,16 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
 
             <div className="space-y-2">
               <label className="text-xs text-muted-foreground">Changer la miniature</label>
+              <input
+                type="file"
+                onChange={(e) => { handleFileChange(e, setNewThumbnail); setRemoveOldThumbnail(false); }}
+                className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary mb-2"
+              />
               
               {newThumbnail && (
-                <div className="mb-2 relative w-32 h-24 rounded-lg overflow-hidden border border-border flex items-center justify-center bg-black/5">
+                <div className="mt-2 relative w-full aspect-video bg-black/5 rounded-lg overflow-hidden border border-border flex items-center justify-center">
                   <div className="relative inline-flex max-w-full h-full">
-                    <img src={URL.createObjectURL(newThumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+                    <img src={URL.createObjectURL(newThumbnail)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
                     
                     {/* APERÇU FILIGRANE SUR LA MINIATURE */}
                     {applyWatermark && watermarkConfig?.logoUrl && (
@@ -413,23 +418,22 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
                       />
                     )}
                   </div>
-                  <button type="button" onClick={() => setNewThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black z-20">X</button>
+                  <button type="button" onClick={() => setNewThumbnail(null)} className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded text-[10px] hover:bg-black z-20">X</button>
                 </div>
               )}
               
-              <input
-                type="file"
-                onChange={(e) => { handleFileChange(e, setNewThumbnail); setRemoveOldThumbnail(false); }}
-                className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary mb-2"
-              />
+              {newThumbnail && newThumbnail.type.startsWith("image/") && watermarkConfig && (
+                <div className="mt-3 flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                  <input type="checkbox" id="applyWatermarkThumb" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
+                  <label htmlFor="applyWatermarkThumb" className="text-[11px] font-bold uppercase tracking-widest text-primary cursor-pointer w-full select-none">Incruster le logo (Miniature)</label>
+                </div>
+              )}
               
               {thumbnailUrl && !newThumbnail && !removeOldThumbnail && (
-                 <div className="relative inline-block mt-2">
-                   <img src={thumbnailUrl} className="h-20 w-32 object-cover rounded-md border border-border shadow-sm" alt="Aperçu actuel" />
-                   <button type="button" onClick={() => setRemoveOldThumbnail(true)} className="absolute -top-2 -right-2 bg-destructive/90 text-white p-1 rounded-full hover:bg-destructive shadow-md z-10 transition-transform hover:scale-110">
-                      <X size={14} />
-                   </button>
-                 </div>
+                <div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg mt-2 border border-border">
+                  <p className="text-[10px] text-primary/70 truncate italic">Miniature actuelle : {thumbnailUrl.split('/').pop()}</p>
+                  <button type="button" onClick={() => setRemoveOldThumbnail(true)} className="text-destructive hover:bg-destructive/10 p-1 rounded text-xs font-bold transition-colors">Supprimer</button>
+                </div>
               )}
               {removeOldThumbnail && !newThumbnail && (
                  <p className="text-[10px] text-destructive italic mt-2 animate-pulse">L'ancienne miniature sera supprimée lors de l'enregistrement.</p>

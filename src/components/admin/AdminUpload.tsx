@@ -390,10 +390,17 @@ const AdminUpload = () => {
       <div className="glass-card p-6">
         <label className="text-sm text-muted-foreground mb-1 block">Image de couverture <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>
         
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileChange(e, setThumbnail)}
+          className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium cursor-pointer mb-2"
+        />
+
         {thumbnail && (
-          <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border flex items-center justify-center bg-black/5">
+          <div className="mt-2 relative w-full aspect-video bg-black/5 rounded-lg overflow-hidden border border-border flex items-center justify-center">
             <div className="relative inline-flex max-w-full h-full">
-              <img src={URL.createObjectURL(thumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+              <img src={URL.createObjectURL(thumbnail)} alt="Aperçu" className="max-w-full max-h-full object-contain" />
               
               {/* APERÇU FILIGRANE SUR LA MINIATURE */}
               {applyWatermark && watermarkConfig?.logoUrl && (
@@ -412,16 +419,16 @@ const AdminUpload = () => {
                 />
               )}
             </div>
-            <button type="button" onClick={() => setThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black z-20">X</button>
+            <button type="button" onClick={() => setThumbnail(null)} className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded text-[10px] hover:bg-black z-20">X</button>
           </div>
         )}
         
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleFileChange(e, setThumbnail)}
-          className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary/20 file:text-primary file:px-4 file:py-1 file:text-sm file:font-medium cursor-pointer"
-        />
+        {thumbnail && watermarkConfig && (
+          <div className="mt-3 flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+            <input type="checkbox" id="applyWatermarkThumbUp" checked={applyWatermark} onChange={e => setApplyWatermark(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
+            <label htmlFor="applyWatermarkThumbUp" className="text-[11px] font-bold uppercase tracking-widest text-primary cursor-pointer w-full select-none">Incruster le logo (Miniature)</label>
+          </div>
+        )}
       </div>
 
       {/* Barre de progression pendant l'upload */}
