@@ -47,7 +47,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       audioRef.current = new Audio();
       
       // Variables pour l'auto-reconnexion intelligente
-      let reconnectTimer: NodeJS.Timeout;
+      let reconnectTimer: ReturnType<typeof setTimeout>;
 
       // Comportements natifs de l'audio
       audioRef.current.addEventListener("playing", () => {
