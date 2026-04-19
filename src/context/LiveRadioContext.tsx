@@ -46,18 +46,37 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
     if (!audioRef.current) {
       audioRef.current = new Audio();
       
+      // Variables pour l'auto-reconnexion intelligente
+      let reconnectTimer: NodeJS.Timeout;
+
       // Comportements natifs de l'audio
       audioRef.current.addEventListener("playing", () => {
         setIsPlaying(true);
         setIsLoading(false);
+        clearTimeout(reconnectTimer); // Annule toute reconnexion si la lecture reprend
       });
       
       audioRef.current.addEventListener("pause", () => {
         setIsPlaying(false);
         setIsLoading(false);
+        clearTimeout(reconnectTimer);
       });
       
-      audioRef.current.addEventListener("waiting", () => setIsLoading(true));
+      audioRef.current.addEventListener("waiting", () => {
+        setIsLoading(true);
+        // Auto-reconnexion : Si ça charge pendant plus de 10 secondes (réseau faible), on force une réactualisation
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          console.warn("Réseau faible, le flux RFI est bloqué... Auto-actualisation du flux !");
+          if (audioRef.current && languageRef.current) {
+            const activeArray = languageRef.current === "en" ? STREAMS_EN : STREAMS_FR;
+            // On ajoute un timestamp pour forcer le navigateur à oublier le cache corrompu
+            audioRef.current.src = `${activeArray[streamIndex.current]}?t=${Date.now()}`;
+            audioRef.current.load();
+            audioRef.current.play().catch(() => {});
+          }
+        }, 10000); // 10 secondes de tolérance
+      });
       
       audioRef.current.addEventListener("error", () => {
         // CASCADE DE SECOURS: Si le flux actuel échoue
@@ -80,6 +99,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
            setIsPlaying(false);
            setIsLoading(false);
            streamIndex.current = 0; // Réinitialisation pour la prochaine tentative manuelle
+           audioRef.current.src = ""; // On coupe la connexion morte
            toast({ 
              title: "Radio RFI Indisponible", 
              description: "Le serveur radio est bloqué ou inaccessible depuis votre réseau internet actuel.",
@@ -98,22 +118,21 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   // Si on change de langue alors que la radio joue, on met à jour le flux dynamiquement !
   useEffect(() => {
     if (audioRef.current) {
-      // A chaque changement de langue, on redémarre l'essai depuis le flux le plus robuste (index 0)
-      streamIndex.current = 0;
-      const activeStream = getActiveStreamUrl();
-      
-      // Si la source est différente de celle en cours
-      if (!audioRef.current.src || !audioRef.current.src.includes(activeStream)) {
-        const wasPlaying = isPlaying;
-        audioRef.current.src = activeStream;
-        audioRef.current.load();
-        // Si elle jouait, on relance automatiquement dans la nouvelle langue
-        if (wasPlaying) {
+      // Uniquement si on est déjà en cours de lecture, on actualise le flux
+      if (isPlaying) {
+        streamIndex.current = 0;
+        const activeStream = getActiveStreamUrl();
+        
+        // Si la source est différente de celle en cours
+        if (!audioRef.current.src || !audioRef.current.src.includes(activeStream)) {
+          // Relance automatiquement dans la nouvelle langue avec un timestamp anti-cache
+          audioRef.current.src = `${activeStream}?t=${Date.now()}`;
+          audioRef.current.load();
           setIsLoading(true);
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
              playPromise.catch(() => {
-               // En cas d'échec initial, l'événement "error" prendra le relais pour la cascade de secours
+               // L'événement error prendra le relais
              });
           }
         }
@@ -126,15 +145,17 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
 
     if (isPlaying) {
       audioRef.current.pause();
+      audioRef.current.src = ""; // DÉCONNEXION TOTALE : Coupe le téléchargement en arrière-plan pour économiser la data
+      setIsPlaying(false);
+      setIsLoading(false);
     } else {
       setIsLoading(true);
-      
-      // Assurer que la source est correcte avant de lancer
+      streamIndex.current = 0; // On repart sur le serveur principal
       const activeStream = getActiveStreamUrl();
-      if (!audioRef.current.src || !audioRef.current.src.includes(activeStream)) {
-         audioRef.current.src = activeStream;
-         audioRef.current.load();
-      }
+      
+      // On connecte le flux en forçant la désactivation du cache navigateur pour avoir du vrai direct pur
+      audioRef.current.src = `${activeStream}?t=${Date.now()}`;
+      audioRef.current.load();
       
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
