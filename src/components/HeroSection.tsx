@@ -39,10 +39,10 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="font-display text-6xl sm:text-8xl md:text-9xl tracking-wider mb-2">
+          <h1 className="font-display text-6xl sm:text-8xl md:text-9xl tracking-wider mb-2 notranslate">
             AXIS<span className="text-primary">24</span>
           </h1>
-          <p className="text-gradient-gold font-display text-2xl sm:text-3xl tracking-[0.3em] mb-4">
+          <p className="text-gradient-gold font-display text-2xl sm:text-3xl tracking-[0.3em] mb-4 notranslate">
             MEDIA GROUPE
           </p>
           <p className="text-muted-foreground text-lg max-w-lg mx-auto mb-10">

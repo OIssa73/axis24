@@ -15,7 +15,7 @@ const Footer = () => {
           
           {/* --- LOGO ET SLOGAN (Partie gauche) --- */}
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-display text-xl tracking-widest text-foreground">
+            <span className="font-display text-xl tracking-widest text-foreground notranslate">
               AXIS<span className="text-primary">24</span>
             </span>
             <span className="text-xs text-muted-foreground uppercase tracking-widest">Media Groupe</span>
@@ -32,7 +32,7 @@ const Footer = () => {
           
           {/* --- COPYRIGHT --- */}
           <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-center mt-2 md:mt-0">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground notranslate">
               {t("© 2026 AXIS24 Media Groupe. Tous droits réservés.")}
             </p>
           </div>
