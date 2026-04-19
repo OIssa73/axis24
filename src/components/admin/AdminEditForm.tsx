@@ -41,6 +41,8 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
   const [allowDownload, setAllowDownload] = useState(true);
   const [thumbnailUrl, setThumbnailUrl] = useState(""); // URL de l'image actuelle
   const [fileUrl, setFileUrl] = useState(""); // URL du fichier actuel
+  const [removeOldFile, setRemoveOldFile] = useState(false); // Si on veut supprimer l'ancien fichier
+  const [removeOldThumbnail, setRemoveOldThumbnail] = useState(false); // Si on veut supprimer l'ancienne miniature
   
   // --- ÉTATS POUR LES NOUVEAUX FICHIERS (Si l'utilisateur veut remplacer l'ancien) ---
   const [newFile, setNewFile] = useState<File | null>(null);
@@ -159,8 +161,8 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
     setProgress(10);
 
     try {
-      let finalFileUrl = fileUrl; // Par défaut, on garde l'ancien
-      let finalThumbnailUrl = thumbnailUrl; // Par défaut, on garde l'ancienne
+      let finalFileUrl = removeOldFile ? "" : fileUrl; // On le vide si demandé
+      let finalThumbnailUrl = removeOldThumbnail ? "" : thumbnailUrl; // On le vide si demandé
 
       // Si un nouveau fichier principal a été choisi, on l'envoie
       if (newFile) {
@@ -375,7 +377,15 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
                 </div>
               )}
 
-              {fileUrl && !newFile && <p className="text-[10px] text-primary/70 truncate px-2 italic mt-1">Fichier actif : {fileUrl.split('/').pop()}</p>}
+              {fileUrl && !newFile && !removeOldFile && (
+                <div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg mt-2 border border-border">
+                  <p className="text-[10px] text-primary/70 truncate italic">Fichier actuel : {fileUrl.split('/').pop()}</p>
+                  <button type="button" onClick={() => setRemoveOldFile(true)} className="text-destructive hover:bg-destructive/10 p-1 rounded text-xs font-bold transition-colors">Supprimer</button>
+                </div>
+              )}
+              {removeOldFile && !newFile && (
+                 <p className="text-[10px] text-destructive italic mt-2 animate-pulse">L'ancien fichier sera supprimé lors de l'enregistrement.</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -409,10 +419,21 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
               
               <input
                 type="file"
-                onChange={(e) => handleFileChange(e, setNewThumbnail)}
+                onChange={(e) => { handleFileChange(e, setNewThumbnail); setRemoveOldThumbnail(false); }}
                 className="text-xs block w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-primary/20 file:text-primary mb-2"
               />
-              {thumbnailUrl && !newThumbnail && <img src={thumbnailUrl} className="h-12 w-24 object-cover rounded-md border border-border shadow-sm" alt="Aperçu actuel" />}
+              
+              {thumbnailUrl && !newThumbnail && !removeOldThumbnail && (
+                 <div className="relative inline-block mt-2">
+                   <img src={thumbnailUrl} className="h-20 w-32 object-cover rounded-md border border-border shadow-sm" alt="Aperçu actuel" />
+                   <button type="button" onClick={() => setRemoveOldThumbnail(true)} className="absolute -top-2 -right-2 bg-destructive/90 text-white p-1 rounded-full hover:bg-destructive shadow-md z-10 transition-transform hover:scale-110">
+                      <X size={14} />
+                   </button>
+                 </div>
+              )}
+              {removeOldThumbnail && !newThumbnail && (
+                 <p className="text-[10px] text-destructive italic mt-2 animate-pulse">L'ancienne miniature sera supprimée lors de l'enregistrement.</p>
+              )}
             </div>
           </div>
         </div>
