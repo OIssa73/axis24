@@ -58,6 +58,10 @@ export const applyWatermarkToImage = async (originalFile: File, config: Watermar
 
     if (!ctx) return originalFile;
 
+    // Configuration pour une qualité visuelle maximale (Ultra HD) sur le logo
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
     // 1. Dessiner l'image de fond
     ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
 
@@ -93,8 +97,8 @@ export const applyWatermarkToImage = async (originalFile: File, config: Watermar
     // Retour à l'opacité normale
     ctx.globalAlpha = 1.0;
 
-    // Convertir de nouveau en File
-    const finalBlob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.95));
+    // Convertir de nouveau en File avec la qualité maximale absolue (1.0)
+    const finalBlob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 1.0));
     
     if (finalBlob) {
       return new File([finalBlob], originalFile.name.replace(/\.[^/.]+$/, "") + "-watermarked.jpg", {
