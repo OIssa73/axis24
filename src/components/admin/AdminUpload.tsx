@@ -391,9 +391,28 @@ const AdminUpload = () => {
         <label className="text-sm text-muted-foreground mb-1 block">Image de couverture <span className="text-xs text-muted-foreground/60">(optionnel - max 5Mo)</span></label>
         
         {thumbnail && (
-          <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border">
-            <img src={URL.createObjectURL(thumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
-            <button type="button" onClick={() => setThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black">X</button>
+          <div className="mb-4 relative w-32 h-24 rounded-lg overflow-hidden border border-border flex items-center justify-center bg-black/5">
+            <div className="relative inline-flex max-w-full h-full">
+              <img src={URL.createObjectURL(thumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+              
+              {/* APERÇU FILIGRANE SUR LA MINIATURE */}
+              {applyWatermark && watermarkConfig?.logoUrl && (
+                <img 
+                  src={watermarkConfig.logoUrl} 
+                  alt="Watermark" 
+                  className="absolute pointer-events-none drop-shadow-md"
+                  style={{
+                    width: `${watermarkConfig.size}%`,
+                    opacity: watermarkConfig.opacity / 100,
+                    top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                    bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                    left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                    right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                  }}
+                />
+              )}
+            </div>
+            <button type="button" onClick={() => setThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black z-20">X</button>
           </div>
         )}
         

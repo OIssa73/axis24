@@ -177,9 +177,14 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
 
       // Si une nouvelle miniature a été choisie, on l'envoie
       if (newThumbnail) {
-        const ext = newThumbnail.name.split(".").pop();
+        let thumbnailToUpload = newThumbnail;
+        // Si on veut appliquer le filigrane sur la miniature
+        if (applyWatermark && watermarkConfig && newThumbnail.type.startsWith("image/")) {
+           thumbnailToUpload = await applyWatermarkToImage(newThumbnail, watermarkConfig);
+        }
+        const ext = thumbnailToUpload.name.split(".").pop();
         const path = `thumbnails/${Date.now()}.${ext}`;
-        finalThumbnailUrl = await uploadFile(newThumbnail, path);
+        finalThumbnailUrl = await uploadFile(thumbnailToUpload, path);
         setProgress(80);
       }
 
@@ -377,9 +382,28 @@ const AdminEditForm = ({ contentId, onCancel, onSuccess }: AdminEditFormProps) =
               <label className="text-xs text-muted-foreground">Changer la miniature</label>
               
               {newThumbnail && (
-                <div className="mb-2 relative w-20 h-16 rounded-md overflow-hidden border border-border">
-                  <img src={URL.createObjectURL(newThumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setNewThumbnail(null)} className="absolute top-0.5 right-0.5 bg-black/50 text-white p-0.5 rounded text-[10px] hover:bg-black">X</button>
+                <div className="mb-2 relative w-32 h-24 rounded-lg overflow-hidden border border-border flex items-center justify-center bg-black/5">
+                  <div className="relative inline-flex max-w-full h-full">
+                    <img src={URL.createObjectURL(newThumbnail)} alt="Aperçu" className="w-full h-full object-cover" />
+                    
+                    {/* APERÇU FILIGRANE SUR LA MINIATURE */}
+                    {applyWatermark && watermarkConfig?.logoUrl && (
+                      <img 
+                        src={watermarkConfig.logoUrl} 
+                        alt="Watermark" 
+                        className="absolute pointer-events-none drop-shadow-md"
+                        style={{
+                          width: `${watermarkConfig.size}%`,
+                          opacity: watermarkConfig.opacity / 100,
+                          top: watermarkConfig.position.includes('top') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                          bottom: watermarkConfig.position.includes('bottom') ? `${watermarkConfig.marginY ?? 3}%` : 'auto',
+                          left: watermarkConfig.position.includes('left') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                          right: watermarkConfig.position.includes('right') ? `${watermarkConfig.marginX ?? 3}%` : 'auto',
+                        }}
+                      />
+                    )}
+                  </div>
+                  <button type="button" onClick={() => setNewThumbnail(null)} className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded hover:bg-black z-20">X</button>
                 </div>
               )}
               
