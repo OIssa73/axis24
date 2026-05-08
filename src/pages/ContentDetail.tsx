@@ -229,15 +229,17 @@ const ContentDetail = () => {
             ) : 
             /* Si c'est une image ou contient une miniature */
             content.thumbnail_url || (content.type === "image" && content.file_url) ? (
-              <img 
-                src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
-                alt={content.title} 
-                className={`w-full transition-transform duration-700 hover:scale-[1.02] object-contain ${
-                  content.type === "image" 
-                    ? "h-auto max-h-[85vh]" 
-                    : "h-full max-h-[70vh]"
-                }`}
-              />
+              <div className="relative w-full h-full flex items-center justify-center">
+                <img 
+                  src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
+                  alt={content.title} 
+                  className={`transition-transform duration-700 hover:scale-[1.02] object-contain ${
+                    content.type === "image" 
+                      ? "max-h-[85vh] w-auto max-w-full" 
+                      : "absolute inset-0 w-full h-full"
+                  }`}
+                />
+              </div>
             ) : 
             /* Par défaut (Logo Axis24) */
             (

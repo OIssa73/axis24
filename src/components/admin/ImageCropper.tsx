@@ -22,24 +22,26 @@ const getCroppedImg = (image: HTMLImageElement, crop: PixelCrop): Promise<Blob> 
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
   
-  canvas.width = crop.width;
-  canvas.height = crop.height;
+  canvas.width = Math.floor(crop.width * scaleX);
+  canvas.height = Math.floor(crop.height * scaleY);
   const ctx = canvas.getContext("2d");
 
   if (!ctx) {
     return Promise.reject(new Error("Impossible de créer le contexte 2D du canvas"));
   }
 
+  ctx.imageSmoothingQuality = "high";
+
   ctx.drawImage(
     image,
-    crop.x * scaleX,
-    crop.y * scaleY,
-    crop.width * scaleX,
-    crop.height * scaleY,
+    Math.floor(crop.x * scaleX),
+    Math.floor(crop.y * scaleY),
+    Math.floor(crop.width * scaleX),
+    Math.floor(crop.height * scaleY),
     0,
     0,
-    crop.width,
-    crop.height
+    canvas.width,
+    canvas.height
   );
 
   return new Promise((resolve, reject) => {
