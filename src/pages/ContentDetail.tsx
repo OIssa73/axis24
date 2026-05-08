@@ -6,7 +6,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 // Importation des icônes d'interface
-import { Calendar, Eye, ArrowLeft, Download, Headphones, Play, Share2 } from "lucide-react";
+import { Calendar, Eye, ArrowLeft, Download, Headphones, Play, Share2, X } from "lucide-react";
 // Importation des composants globaux (Barre de navigation et Pied de page)
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -39,6 +39,7 @@ const ContentDetail = () => {
   const { id } = useParams();
   const [content, setContent] = useState<Content | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   interface Banner {
     id?: string;
@@ -229,7 +230,10 @@ const ContentDetail = () => {
             ) : 
             /* Si c'est une image ou contient une miniature */
             content.thumbnail_url || (content.type === "image" && content.file_url) ? (
-              <div className="relative w-full h-full flex items-center justify-center">
+              <div 
+                className="relative w-full h-full flex items-center justify-center cursor-pointer group/img"
+                onClick={() => setFullscreenImage(content.type === "image" ? content.file_url! : content.thumbnail_url!)}
+              >
                 <img 
                   src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
                   alt={content.title} 
@@ -239,6 +243,12 @@ const ContentDetail = () => {
                       : "absolute inset-0 w-full h-full"
                   }`}
                 />
+                {/* Overlay au survol pour indiquer qu'on peut cliquer */}
+                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors duration-300 flex items-center justify-center rounded-[2rem]">
+                  <div className="bg-primary/90 text-white p-4 rounded-full opacity-0 group-hover/img:opacity-100 scale-50 group-hover/img:scale-100 transition-all duration-300 drop-shadow-xl backdrop-blur-sm">
+                    <Eye size={32} />
+                  </div>
+                </div>
               </div>
             ) : 
             /* Par défaut (Logo Axis24) */
@@ -332,6 +342,36 @@ const ContentDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* --- MODALE PLEIN ÉCRAN POUR L'IMAGE --- */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setFullscreenImage(null)}
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 cursor-zoom-out backdrop-blur-md"
+          >
+            <button 
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-6 right-6 text-white/70 hover:text-white bg-black/50 hover:bg-primary rounded-full p-3 transition-all z-10"
+            >
+              <X size={24} />
+            </button>
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              src={fullscreenImage}
+              alt="Vue en taille réelle"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-default"
+              onClick={(e) => e.stopPropagation()} // Évite de fermer si on clique SUR l'image
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
