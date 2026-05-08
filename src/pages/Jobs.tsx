@@ -14,7 +14,7 @@ const Jobs = () => (
     {/* On ajoute un espace en haut pour ne pas être caché par le menu fixe */}
     <div className="pt-16">
       <BackButton />
-      <JobsSection />
+      <JobsSection showAll={true} />
     </div>
     <Footer />
   </div>

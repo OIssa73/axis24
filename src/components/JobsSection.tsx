@@ -24,13 +24,14 @@ interface JobArticle {
 interface Props {
   title?: string;
   subtitle?: string;
+  showAll?: boolean;
 }
 
 /**
  * Composant JOBS SECTION (Section des offres d'emploi).
  * Il s'occupe de récupérer les contenus marqués comme "job" et de les afficher proprement.
  */
-const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez nos offres d'emploi et opportunités de carrière." }: Props) => {
+const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez nos offres d'emploi et opportunités de carrière.", showAll = false }: Props) => {
   // États pour stocker les offres d'emploi et l'indicateur de chargement
   const [jobs, setJobs] = useState<JobArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,8 +94,8 @@ const JobsSection = ({ title = "JOBS ET OFFRES D'EMPLOI", subtitle = "Découvrez
         ) : (
           // Grille affichant les cartes d'emploi
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* On affiche un maximum de 6 offres sur la page d'accueil */}
-            {jobs.slice(0, 6).map((job, i) => (
+            {/* Si showAll est vrai, on affiche tout, sinon on limite à 6 */}
+            {jobs.slice(0, showAll ? undefined : 6).map((job, i) => (
               <motion.article
                 key={job.id}
                 initial={{ opacity: 0 }}

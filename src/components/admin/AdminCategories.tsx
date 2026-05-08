@@ -132,18 +132,18 @@ const AdminCategories = () => {
     <div className="space-y-6">
       
       {/* --- FORMULAIRE D'AJOUT --- */}
-      <form onSubmit={addCategory} className="glass-card p-6 flex flex-col sm:flex-row gap-3">
+      <form onSubmit={addCategory} className="bg-card text-card-foreground border border-border shadow-sm rounded-xl p-6 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nom de la nouvelle catégorie (ex: Politique)"
-          className="flex-1 bg-muted border border-border rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50"
+          className="flex-1 bg-background border border-input rounded-lg px-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50"
         />
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="bg-muted border border-border rounded-lg px-4 py-3 text-foreground"
+          className="bg-background border border-input rounded-lg px-4 py-3 text-foreground"
         >
           <option value="radio">Radio</option>
           <option value="tv">Télévision</option>
@@ -165,7 +165,7 @@ const AdminCategories = () => {
           </h3>
           <div className="grid gap-2">
             {cats.map((cat) => (
-              <div key={cat.id} className="glass-card p-4 flex items-center justify-between gap-4 hover:border-primary/20 transition-all">
+              <div key={cat.id} className="bg-card border border-border rounded-xl shadow-sm p-4 flex items-center justify-between gap-4 hover:border-primary/50 transition-all">
                 <div className="flex-1">
                   {editingId === cat.id ? (
                     // Mode Édition (Modification du nom)
@@ -220,7 +220,7 @@ const AdminCategories = () => {
 
       {/* Message si aucune catégorie n'existe */}
       {categories.length === 0 && (
-        <div className="glass-card p-10 text-center text-muted-foreground italic">
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-muted-foreground italic shadow-sm">
           Aucune catégorie n'a encore été créée pour le moment.
         </div>
       )}

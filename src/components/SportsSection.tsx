@@ -24,13 +24,14 @@ interface Article {
 interface Props {
   title?: string;
   subtitle?: string;
+  showAll?: boolean;
 }
 
 /**
  * Composant SPORTS SECTION (Section des Sports).
  * Il filtre et affiche les actualités sportives du site.
  */
-const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualité sportive en direct." }: Props) => {
+const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualité sportive en direct.", showAll = false }: Props) => {
   // États pour stocker les articles de sport et savoir si on charge encore
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,8 +99,8 @@ const SportsSection = ({ title = "Axis 24 SPORTS", subtitle = "Toute l'actualit�
         ) : (
           // Grille des cartes sports
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* On limite l'affichage à 6 articles sur l'accueil */}
-            {articles.slice(0, 6).map((article, i) => (
+            {/* Si showAll est vrai, on affiche tout, sinon on limite à 6 */}
+            {articles.slice(0, showAll ? undefined : 6).map((article, i) => (
               <motion.article
                 key={article.id}
                 initial={{ opacity: 0 }}

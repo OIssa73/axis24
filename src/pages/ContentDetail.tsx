@@ -232,10 +232,10 @@ const ContentDetail = () => {
               <img 
                 src={content.type === "image" ? content.file_url! : content.thumbnail_url!} 
                 alt={content.title} 
-                className={`w-full transition-transform duration-700 hover:scale-[1.02] ${
+                className={`w-full transition-transform duration-700 hover:scale-[1.02] object-contain ${
                   content.type === "image" 
-                    ? "h-auto max-h-[85vh] object-contain" 
-                    : "h-full object-cover"
+                    ? "h-auto max-h-[85vh]" 
+                    : "h-full max-h-[70vh]"
                 }`}
               />
             ) : 
@@ -253,7 +253,7 @@ const ContentDetail = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed min-w-0 w-full text-left md:text-justify"
+              className="prose prose-invert prose-primary max-w-none prose-p:text-lg prose-p:leading-relaxed prose-img:object-contain prose-img:max-w-full prose-img:h-auto prose-img:max-h-[70vh] prose-img:mx-auto prose-img:rounded-xl min-w-0 w-full text-left md:text-justify"
             >
               <div className="space-y-10 text-xl leading-[1.7] text-foreground/80 whitespace-pre-wrap break-words min-w-0 w-full overflow-hidden [word-break:break-word]">
                 {content.body || "Pas de texte supplémentaire pour cet élément."}

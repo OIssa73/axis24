@@ -26,13 +26,14 @@ interface Article {
 interface Props {
   title?: string;
   subtitle?: string;
+  showAll?: boolean;
 }
 
 /**
  * Composant NEWS SECTION (Section des actualités).
  * Il s'occupe de récupérer les articles du "Mag" et de les afficher.
  */
-const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information décryptée pour vous." }: Props) => {
+const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information décryptée pour vous.", showAll = false }: Props) => {
   // États pour stocker les articles, l'état de chargement et l'onglet actif (catégorie)
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,8 +134,8 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
               transition={{ duration: 0.3 }}
               className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
             >
-              {/* On n'affiche que les 6 premiers articles sur l'accueil */}
-              {filteredArticles.slice(0, 6).map((article, i) => (
+              {/* Si showAll est vrai, on affiche tout, sinon on limite à 6 */}
+              {filteredArticles.slice(0, showAll ? undefined : 6).map((article, i) => (
                 <motion.article
                   key={article.id}
                   initial={{ opacity: 0 }}
@@ -192,8 +193,8 @@ const NewsSection = ({ title = "LE MAG AXIS24", subtitle = "Toute l'information 
           </AnimatePresence>
         )}
         
-        {/* Bouton "Voir tout" si il y a plus de 6 articles */}
-        {filteredArticles.length > 6 && (
+        {/* Bouton "Voir tout" si on n'est pas déjà sur la page complète et qu'il y a plus de 6 articles */}
+        {!showAll && filteredArticles.length > 6 && (
            <div className="mt-16 text-center">
              <Link to="/actualites" className="btn-primary-glow px-8 py-3 rounded-full text-xs font-bold uppercase tracking-[0.2em]">
                {t("view_all")}

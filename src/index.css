@@ -112,7 +112,12 @@
     font-family: 'Inter', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.01em;
     font-weight: 500;
@@ -159,8 +164,17 @@
 }
 
 @keyframes pulse-live {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.5); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.5);
+  }
 }
 
 /* --- Google Translate Extreme Overrides --- */
@@ -170,7 +184,7 @@ body {
 }
 
 /* On masque absolument toutes les iframes, bannières et widgets flottants */
-.skiptranslate > iframe,
+.skiptranslate>iframe,
 .goog-te-banner-frame,
 #goog-gt-tt,
 .goog-tooltip,
@@ -200,13 +214,14 @@ body {
 }
 
 /* L'élément parent caché qui fait marcher notre menu personnalisé reste caché visuellement au besoin */
-#google_translate_element, 
+#google_translate_element,
 .skiptranslate {
   display: none !important;
 }
 
 /* --- OPTIMISATIONS MOBILES STRICTES --- */
 @media (max-width: 768px) {
+
   /* 1. Désactivation pure et dure des flous coûteux (Glassmorphism) pour fluidifier le défilement */
   * {
     backdrop-filter: none !important;
@@ -214,7 +229,7 @@ body {
   }
 
   /* 2. Annulation systématique des justifications sur mobile pour éviter les débordements de textes et gros trous */
-  .text-justify, 
+  .text-justify,
   [class*="text-justify:"],
   [class*="[text-justify"],
   .prose p {
@@ -227,4 +242,3 @@ body {
     box-shadow: none !important;
   }
 }
-
