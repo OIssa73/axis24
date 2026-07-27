@@ -1,5 +1,6 @@
 // Importation des outils React pour les états, les effets et les références (audio)
 import { useState, useEffect, useRef } from "react";
+import { updateMediaSession, clearMediaSession } from "@/utils/mediaSessionHelper";
 // Importation de Framer Motion pour les animations fluides
 import { motion, AnimatePresence } from "framer-motion";
 // Importation des icônes (Lecture, Pause, Casque, Volume, etc.)
@@ -71,6 +72,38 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Sync live radio and podcast playback
+  useEffect(() => {
+    if (isLivePlaying && isPlaying) {
+      setIsPlaying(false);
+    }
+  }, [isLivePlaying]);
+
+  // Update MediaSession metadata for podcasts
+  useEffect(() => {
+    if (currentAudio && isPlaying) {
+      updateMediaSession(
+        currentAudio.title,
+        "AXIS24 - Podcast",
+        currentAudio.categories?.name || "Audio",
+        currentAudio.thumbnail_url,
+        true,
+        () => setIsPlaying(true),
+        () => setIsPlaying(false)
+      );
+    } else if (currentAudio && !isPlaying && !isLivePlaying) {
+      updateMediaSession(
+        currentAudio.title,
+        "AXIS24 - Podcast",
+        currentAudio.categories?.name || "Audio",
+        currentAudio.thumbnail_url,
+        false,
+        () => setIsPlaying(true),
+        () => setIsPlaying(false)
+      );
+    }
+  }, [isPlaying, currentAudio, isLivePlaying]);
+
   // Détermination des catégories disponibles pour les filtres
   const categories = ["Tous", ...Array.from(new Set(podcasts.map(p => p.categories?.name || "Général")))];
 
@@ -83,6 +116,9 @@ const RadioSection = ({ title = "RADIO AXIS24", subtitle = "Écoutez nos émissi
    * Gère le clic sur un podcast pour le lancer ou le mettre en pause.
    */
   const handlePlayPodcast = (podcast: PodcastContent) => {
+    if (isLivePlaying) {
+      toggleLivePlay();
+    }
     if (currentAudio?.id === podcast.id) {
       // Si on clique sur le même, on fait switch lecture/pause
       setIsPlaying(!isPlaying);

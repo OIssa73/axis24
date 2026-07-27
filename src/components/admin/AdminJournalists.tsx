@@ -227,7 +227,7 @@ const AdminJournalists = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Fenêtre de recadrage d'image (apparaît si on choisit un fichier) */}
       {cropImageSrc && (
@@ -239,7 +239,7 @@ const AdminJournalists = () => {
       )}
       
       {/* --- FORMULAIRE --- */}
-      <div className="glass-card p-6 bg-white shadow-xl shadow-black/5 dark:bg-card">
+      <div className="bg-card text-card-foreground border border-border shadow-sm rounded-xl p-4 sm:p-6 max-w-2xl">
         <h3 className="text-xl font-display uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
           <User size={20} /> {editingId ? "Modifier les informations" : "Ajouter un nouveau membre"}
         </h3>
@@ -328,28 +328,28 @@ const AdminJournalists = () => {
       {/* --- LISTE DES JOURNALISTES ACTUELS --- */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {journalists.map((j) => (
-          <div key={j.id} className="glass-card p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-white dark:bg-card">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20 bg-muted shrink-0 shadow-inner">
+          <div key={j.id} className="bg-card border border-border rounded-xl shadow-sm p-3 sm:p-4 flex items-center gap-3 sm:gap-4 group hover:border-primary/50 transition-all">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-primary/20 bg-muted shrink-0 shadow-inner">
               <img src={j.image_url} alt={j.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-normal tracking-wide text-foreground truncate">{j.name}</h4>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">Équipe de rédaction Axis24</p>
+              <h4 className="font-medium tracking-wide text-foreground truncate text-sm sm:text-base">{j.name}</h4>
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-tighter">Équipe de rédaction Axis24</p>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-0.5 sm:gap-1 shrink-0">
               <button
                 onClick={() => startEdit(j)}
-                className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
                 title="Modifier"
               >
-                <Edit2 size={16} />
+                <Edit2 size={14} className="sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={() => deleteJournalist(j.id)}
-                className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                 title="Supprimer de l'équipe"
               >
-                <Trash2 size={16} />
+                <Trash2 size={14} className="sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
@@ -357,9 +357,9 @@ const AdminJournalists = () => {
         
         {/* Affichage si l'équipe est vide */}
         {journalists.length === 0 && !uploading && (
-          <div className="col-span-full py-20 text-center text-muted-foreground glass-card border-dashed bg-muted/5 opacity-60">
+          <div className="col-span-full py-20 text-center text-muted-foreground bg-card border-2 border-dashed border-border rounded-xl p-10 italic shadow-sm opacity-60">
             <User className="mx-auto mb-4 opacity-20" size={48} />
-            <p className="text-sm uppercase tracking-widest font-medium italic">Aucun journaliste enregistré pour le moment.</p>
+            <p className="text-sm uppercase tracking-widest font-medium">Aucun journaliste enregistré pour le moment.</p>
           </div>
         )}
       </div>

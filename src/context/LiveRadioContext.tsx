@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "./LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { updateMediaSession, clearMediaSession } from "@/utils/mediaSessionHelper";
 
 interface LiveRadioContextType {
   isPlaying: boolean;
@@ -32,6 +33,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
   const { language } = useLanguage();
   const languageRef = useRef(language);
   const { toast } = useToast();
+  const togglePlayRef = useRef<(() => void) | null>(null);
 
   // Mise à jour de la référence de langue magique
   useEffect(() => {
@@ -55,12 +57,30 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
         setIsPlaying(true);
         setIsLoading(false);
         clearTimeout(reconnectTimer); // Annule toute reconnexion si la lecture reprend
+        updateMediaSession(
+          languageRef.current === "en" ? "RFI Radio English" : "RFI Radio Afrique",
+          "AXIS24 - Direct",
+          "RFI Live Stream",
+          "/favicon.png",
+          true,
+          () => togglePlayRef.current?.(),
+          () => togglePlayRef.current?.()
+        );
       });
       
       audioRef.current.addEventListener("pause", () => {
         setIsPlaying(false);
         setIsLoading(false);
         clearTimeout(reconnectTimer);
+        updateMediaSession(
+          languageRef.current === "en" ? "RFI Radio English" : "RFI Radio Afrique",
+          "AXIS24 - Direct",
+          "RFI Live Stream",
+          "/favicon.png",
+          false,
+          () => togglePlayRef.current?.(),
+          () => togglePlayRef.current?.()
+        );
       });
       
       audioRef.current.addEventListener("waiting", () => {
@@ -138,6 +158,16 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
                // L'événement error prendra le relais
              });
           }
+          
+          updateMediaSession(
+            language === "en" ? "RFI Radio English" : "RFI Radio Afrique",
+            "AXIS24 - Direct",
+            "RFI Live Stream",
+            "/favicon.png",
+            true,
+            () => togglePlayRef.current?.(),
+            () => togglePlayRef.current?.()
+          );
         }
       }
     }
@@ -153,6 +183,7 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       audioRef.current.load(); // Vide complètement le tampon
       setIsPlaying(false);
       setIsLoading(false);
+      clearMediaSession();
       
       // On réinitialise la sécurité après un court délai
       setTimeout(() => { isIntentionalStop.current = false; }, 500);
@@ -174,6 +205,10 @@ export const LiveRadioProvider = ({ children }: { children: React.ReactNode }) =
       }
     }
   };
+
+  useEffect(() => {
+    togglePlayRef.current = togglePlay;
+  }, [togglePlay]);
 
   return (
     <LiveRadioContext.Provider value={{ isPlaying, isLoading, togglePlay }}>

@@ -101,24 +101,24 @@ const AdminWatermark = () => {
   if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-primary" size={40} /></div>;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-500">
-      <div className="glass-card p-8 shadow-xl shadow-black/5 dark:bg-card border-l-4 border-l-primary">
-        <div className="flex items-center justify-between border-b border-border pb-6 mb-8">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="bg-card text-card-foreground border border-border shadow-sm rounded-xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-border pb-6 mb-8">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-xl text-primary">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
               <Stamp size={28} />
             </div>
             <div>
-              <h3 className="text-2xl font-display uppercase tracking-widest text-foreground font-bold">Filigrane & Logo</h3>
-              <p className="text-sm text-muted-foreground mt-1">Superposez automatiquement votre logo sur vos vidéos et images "Comme à la TV".</p>
+              <h3 className="text-xl sm:text-2xl font-display uppercase tracking-widest text-foreground font-bold">Filigrane & Logo</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Superposez automatiquement votre logo sur vos vidéos et images "Comme à la TV".</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 justify-end sm:justify-start">
             <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground">
               {config.enabled ? "Activé" : "Désactivé"}
             </span>
             <div 
-              className={`w-14 h-8 rounded-full relative cursor-pointer transition-colors flex items-center px-1 shadow-inner ${config.enabled ? "bg-primary" : "bg-muted border border-border"}`}
+              className={`w-14 h-8 rounded-full relative cursor-pointer transition-colors flex items-center px-1 shadow-inner shrink-0 ${config.enabled ? "bg-primary" : "bg-muted border border-border"}`}
               onClick={() => setConfig({ ...config, enabled: !config.enabled })}
             >
               <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all ${config.enabled ? "translate-x-6" : "translate-x-0"}`} />
@@ -171,7 +171,7 @@ const AdminWatermark = () => {
             </div>
 
             {/* Colonne de Droite : Paramètres */}
-            <div className="space-y-8 bg-muted/10 p-6 rounded-2xl border border-border/50">
+            <div className="space-y-8 bg-muted/10 p-4 sm:p-6 rounded-2xl border border-border/50">
               
               {/* Position */}
               <div className="space-y-4">
@@ -188,7 +188,7 @@ const AdminWatermark = () => {
                     <button
                       key={pos.id}
                       onClick={() => setConfig({ ...config, position: pos.id as WatermarkConfig["position"] })}
-                      className={`py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest border transition-all ${
+                      className={`py-2 px-2 sm:px-4 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-widest border transition-all ${
                         config.position === pos.id 
                           ? "bg-primary text-white border-primary shadow-md shadow-primary/20" 
                           : "bg-background border-border text-muted-foreground hover:border-primary/50"

@@ -263,17 +263,17 @@ const AdminAds = () => {
   if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-primary" size={40} /></div>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-20 animate-in fade-in duration-500">
       
       {/* --- FORMULAIRE BANNIÈRES --- */}
-      <div id="banner-form" className="glass-card p-6 bg-white shadow-lg dark:bg-card scroll-mt-20">
+      <div id="banner-form" className="bg-card text-card-foreground border border-border shadow-sm rounded-xl p-4 sm:p-6 scroll-mt-20">
         <div className="flex items-center gap-3 border-b border-border pb-4 mb-6">
           <Megaphone className="text-primary" size={24} />
           <h3 className="text-xl font-display uppercase tracking-widest text-foreground">Carrousel Publicitaire (Annonces)</h3>
         </div>
 
         <div className="space-y-6 mb-10">
-          <div className="grid md:grid-cols-2 gap-6 bg-muted/20 p-5 rounded-xl border border-primary/10">
+          <div className="grid md:grid-cols-2 gap-6 bg-muted/20 p-4 sm:p-5 rounded-xl border border-border/50">
             <div className="col-span-full flex items-center justify-between mb-2">
                <span className="font-bold text-sm text-primary uppercase tracking-tighter">
                  {editingBannerId ? "Modifier l'annonce sélectionnée" : "Créer une nouvelle annonce"}
@@ -361,27 +361,30 @@ const AdminAds = () => {
           </h4>
           <div className="space-y-3">
              {config.banners.map((banner, index) => (
-               <div key={banner.id} className={`flex gap-4 p-4 border border-border rounded-xl bg-background items-center hover:border-primary/20 transition-all ${!banner.enabled ? 'opacity-40 grayscale' : 'shadow-sm'}`}>
-                  {/* Flèches pour l'ordre */}
-                  <div className="flex flex-col gap-1 items-center">
-                      <button onClick={() => moveBanner(index, 'up')} disabled={index === 0} className="p-1 hover:text-primary disabled:opacity-0 transition-colors"><ArrowUp size={14} /></button>
-                      <span className="text-[10px] font-bold text-primary">{index + 1}</span>
-                      <button onClick={() => moveBanner(index, 'down')} disabled={index === config.banners.length - 1} className="p-1 hover:text-primary disabled:opacity-0 transition-colors"><ArrowDown size={14} /></button>
-                  </div>
-                  
-                  {/* Miniature */}
-                  <div className="w-24 h-12 bg-muted rounded overflow-hidden shadow-inner flex shrink-0 items-center justify-center text-[10px] text-muted-foreground font-bold border border-border">
-                     {banner.imageUrl ? <img src={banner.imageUrl} alt="" className="w-full h-full object-cover" /> : "SANS IMAGE"}
-                  </div>
+               <div key={banner.id} className={`flex flex-col sm:flex-row gap-4 p-4 border border-border rounded-xl bg-background items-start sm:items-center hover:border-primary/50 transition-all ${!banner.enabled ? 'opacity-40 grayscale' : 'shadow-sm'}`}>
+                  {/* Conteneur pour l'ordre, l'image et les textes */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                    {/* Flèches pour l'ordre */}
+                    <div className="flex flex-col gap-1 items-center shrink-0">
+                        <button onClick={() => moveBanner(index, 'up')} disabled={index === 0} className="p-1 hover:text-primary disabled:opacity-0 transition-colors"><ArrowUp size={14} /></button>
+                        <span className="text-[10px] font-bold text-primary">{index + 1}</span>
+                        <button onClick={() => moveBanner(index, 'down')} disabled={index === config.banners.length - 1} className="p-1 hover:text-primary disabled:opacity-0 transition-colors"><ArrowDown size={14} /></button>
+                    </div>
+                    
+                    {/* Miniature */}
+                    <div className="w-20 h-10 sm:w-24 sm:h-12 bg-muted rounded overflow-hidden shadow-inner flex shrink-0 items-center justify-center text-[10px] text-muted-foreground font-bold border border-border">
+                       {banner.imageUrl ? <img src={banner.imageUrl} alt="" className="w-full h-full object-cover" /> : "SANS IMAGE"}
+                    </div>
 
-                  {/* Infos */}
-                  <div className="flex-1 min-w-0">
-                     <p className="font-bold text-sm truncate uppercase tracking-tighter">{banner.title || "ANNONCE SANS NOM"}</p>
-                     <p className="text-[10px] text-muted-foreground truncate">{banner.linkUrl || "Pas de redirection"} • {banner.description}</p>
+                    {/* Infos */}
+                    <div className="flex-1 min-w-0">
+                       <p className="font-bold text-sm truncate uppercase tracking-tighter">{banner.title || "ANNONCE SANS NOM"}</p>
+                       <p className="text-[10px] text-muted-foreground truncate">{banner.linkUrl || "Pas de redirection"} • {banner.description}</p>
+                    </div>
                   </div>
 
                   {/* Actions rapides */}
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0 justify-end w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0">
                     <button onClick={() => toggleBannerVisibility(banner.id)} className={`p-2 rounded-lg transition-colors ${banner.enabled ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted"}`} title={banner.enabled ? "Masquer" : "Afficher"}>
                       {banner.enabled ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
@@ -400,7 +403,7 @@ const AdminAds = () => {
 
 
       {/* --- SECTION PARTENAIRES --- */}
-      <div id="partner-form" className="glass-card p-6 bg-white shadow-lg dark:bg-card scroll-mt-20">
+      <div id="partner-form" className="bg-card text-card-foreground border border-border shadow-sm rounded-xl p-4 sm:p-6 scroll-mt-20">
         <div className="flex items-center gap-3 border-b border-border pb-4 mb-6">
           <Star className="text-secondary" size={24} />
           <h3 className="text-xl font-display uppercase tracking-widest text-foreground">Partenaires & Affiliés</h3>
@@ -421,7 +424,7 @@ const AdminAds = () => {
           </div>
 
           {/* Formulaire Partenaire */}
-          <div className="grid md:grid-cols-3 gap-4 bg-muted/30 p-5 rounded-2xl border border-border/50">
+          <div className="grid md:grid-cols-3 gap-4 bg-muted/30 p-4 sm:p-5 rounded-2xl border border-border/50">
             <div className="col-span-full mb-1 flex justify-between">
               <span className="text-xs font-bold uppercase tracking-widest text-secondary">{editingPartnerId ? "Modifier le partenaire" : "Ajouter un nouveau logo"}</span>
               {editingPartnerId && <button onClick={() => {setEditingPartnerId(null); setNewPartner({name:'',url:'',category:'',enabled:true})}} className="text-[10px] uppercase font-bold text-muted-foreground hover:text-foreground">Annuler</button>}
@@ -442,21 +445,22 @@ const AdminAds = () => {
           <div className="border border-border rounded-2xl overflow-hidden shadow-sm">
              <ul className="divide-y divide-border">
                 {config.partners.map((partner, index) => (
-                  <li key={partner.id} className={`flex items-center justify-between p-4 bg-background transition-all ${!partner.enabled ? "opacity-40 grayscale" : ""}`}>
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col gap-1">
+                  <li key={partner.id} className={`flex flex-col sm:flex-row justify-between p-4 bg-background transition-all gap-4 hover:border-primary/50 ${!partner.enabled ? "opacity-40 grayscale" : ""}`}>
+                    <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                      <div className="flex flex-col gap-1 shrink-0">
                         <button onClick={() => movePartner(index, 'up')} disabled={index === 0} className="p-1 hover:text-secondary disabled:opacity-0"><ArrowUp size={14} /></button>
                         <button onClick={() => movePartner(index, 'down')} disabled={index === config.partners.length - 1} className="p-1 hover:text-secondary disabled:opacity-0"><ArrowDown size={14} /></button>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-sm uppercase">{partner.name}</span>
-                          <span className="text-[9px] bg-secondary/10 text-secondary border border-secondary/20 px-2 py-0.5 rounded-full uppercase font-bold tracking-tighter">{partner.category}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="font-bold text-sm uppercase truncate">{partner.name}</span>
+                          <span className="text-[9px] bg-secondary/10 text-secondary border border-secondary/20 px-2 py-0.5 rounded-full uppercase font-bold tracking-tighter shrink-0">{partner.category}</span>
                         </div>
+                        <p className="text-[10px] text-muted-foreground truncate mt-1">{partner.url}</p>
                       </div>
                     </div>
                     
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 shrink-0 justify-end w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0">
                       <button onClick={() => togglePartnerVisibility(partner.id)} className={`p-2 rounded-lg transition-colors ${partner.enabled ? "text-primary" : "text-muted-foreground"}`}>
                         {partner.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>

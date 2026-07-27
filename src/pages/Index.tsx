@@ -59,41 +59,70 @@ const defaultTitles: SectionTitles = {
  * C'est ici que l'on assemble tous les morceaux du site.
  */
 const Index = () => {
-  // États pour stocker quelles sections afficher
-  const [sections, setSections] = useState<Sections>({
-    hero: true,
-    external_news: true,
-    internal_news: true,
-    journalists: true,
-    tv: true,
-    radio: true,
-    sports: true,
-    jobs: true,
+  // États pour stocker quelles sections afficher (avec cache local de secours si le réseau dégrade)
+  const [sections, setSections] = useState<Sections>(() => {
+    const cached = localStorage.getItem("axis24_homepage_sections");
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return {
+      hero: true,
+      external_news: false, // Par défaut désactivé pour éviter l'affichage forcé en cas d'erreur réseau
+      internal_news: true,
+      journalists: true,
+      tv: true,
+      radio: true,
+      sports: true,
+      jobs: true,
+    };
   });
   
-  // État pour stocker les titres personnalisés
-  const [titles, setTitles] = useState<SectionTitles>(defaultTitles);
+  // État pour stocker les titres personnalisés (avec cache local)
+  const [titles, setTitles] = useState<SectionTitles>(() => {
+    const cached = localStorage.getItem("axis24_section_titles");
+    if (cached) {
+      try {
+        return { ...defaultTitles, ...JSON.parse(cached) };
+      } catch (e) {}
+    }
+    return defaultTitles;
+  });
+  
   // État pour savoir si on est encore en train de charger les réglages
   const [loadingSettings, setLoadingSettings] = useState(true);
 
   // Au chargement de la page, on va chercher les réglages dans la base de données
   useEffect(() => {
     const fetchSettings = async () => {
-      const { data } = await supabase
-        .from("site_settings")
-        .select("*")
-        .in("key", ["homepage_sections", "section_titles"]);
-      
-      if (data) {
-        // On récupère l'interrupteur des sections
-        const sectionsData = data.find(d => d.key === "homepage_sections");
-        if (sectionsData) setSections(sectionsData.value as unknown as Sections);
+      try {
+        const { data, error } = await supabase
+          .from("site_settings")
+          .select("*")
+          .in("key", ["homepage_sections", "section_titles"]);
         
-        // On récupère les titres personnalisés
-        const titlesData = data.find(d => d.key === "section_titles");
-        if (titlesData) setTitles({ ...defaultTitles, ...(titlesData.value as unknown as SectionTitles) });
+        if (data && !error) {
+          // On récupère l'interrupteur des sections et on le cache
+          const sectionsData = data.find(d => d.key === "homepage_sections");
+          if (sectionsData) {
+            setSections(sectionsData.value as unknown as Sections);
+            localStorage.setItem("axis24_homepage_sections", JSON.stringify(sectionsData.value));
+          }
+          
+          // On récupère les titres personnalisés et on les cache
+          const titlesData = data.find(d => d.key === "section_titles");
+          if (titlesData) {
+            const mergedTitles = { ...defaultTitles, ...(titlesData.value as unknown as SectionTitles) };
+            setTitles(mergedTitles);
+            localStorage.setItem("axis24_section_titles", JSON.stringify(titlesData.value));
+          }
+        }
+      } catch (e) {
+        console.warn("Erreur de récupération des paramètres réseau :", e);
+      } finally {
+        setLoadingSettings(false); // Chargement terminé dans tous les cas
       }
-      setLoadingSettings(false); // Chargement terminé
     };
     fetchSettings();
   }, []);

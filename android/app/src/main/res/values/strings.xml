@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Axis24</string>
+    <string name="title_activity_main">Axis24</string>
+    <string name="package_name">com.axis24.mediahub</string>
+    <string name="custom_url_scheme">com.axis24.mediahub</string>
+</resources>
