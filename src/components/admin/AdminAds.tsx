@@ -314,10 +314,10 @@ const AdminAds = () => {
             </div>
 
             {/* Zone d'image de la bannière */}
-            <div className="space-y-2 flex flex-col">
+            <div className="space-y-2 flex flex-col w-full">
               <label className="text-xs text-muted-foreground block font-bold">Image Publicitaire (Recommandé : 1200x400 px)</label>
               {newBanner.imageUrl ? (
-                <div className="relative rounded-xl border border-border overflow-hidden group aspect-[21/9] flex-1 shadow-inner">
+                <div className="relative w-full rounded-xl border border-border overflow-hidden group aspect-[3/1] shadow-inner">
                   <img src={newBanner.imageUrl} alt="Aperçu" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
                     <button 
@@ -329,7 +329,7 @@ const AdminAds = () => {
                   </div>
                 </div>
               ) : (
-                <div className="relative border-2 border-dashed border-border/50 rounded-xl hover:border-primary/50 transition-all flex flex-col items-center justify-center bg-muted/5 flex-1 p-4 aspect-[21/9]">
+                <div className="relative w-full border-2 border-dashed border-border/50 rounded-xl hover:border-primary/50 transition-all flex flex-col items-center justify-center bg-muted/5 p-4 aspect-[3/1]">
                   <input type="file" accept="image/*" onChange={handleBannerFileUpload} disabled={uploading} className="absolute inset-0 opacity-0 cursor-pointer" />
                   {uploading ? <Loader2 className="animate-spin text-primary" size={24} /> : (
                     <div className="text-center">
