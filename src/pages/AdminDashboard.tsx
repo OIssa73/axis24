@@ -122,7 +122,7 @@ const AdminDashboard = () => {
       )}
 
       {/* --- ZONE DE CONTENU PRINCIPAL --- */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
         
         {/* Barre du haut (En-tête) */}
         <header className="h-14 border-b border-border flex items-center px-4 gap-4 justify-between bg-card text-foreground">

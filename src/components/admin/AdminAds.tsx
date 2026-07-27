@@ -273,7 +273,7 @@ const AdminAds = () => {
         </div>
 
         <div className="space-y-6 mb-10">
-          <div className="grid md:grid-cols-2 gap-6 bg-muted/20 p-4 sm:p-5 rounded-xl border border-border/50">
+          <div className="grid md:grid-cols-2 gap-6 bg-muted/20 p-4 sm:p-5 rounded-xl border border-border/50 items-start">
             <div className="col-span-full flex items-center justify-between mb-2">
                <span className="font-bold text-sm text-primary uppercase tracking-tighter">
                  {editingBannerId ? "Modifier l'annonce sélectionnée" : "Créer une nouvelle annonce"}
