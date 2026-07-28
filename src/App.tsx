@@ -49,6 +49,15 @@ const ScrollToTop = () => {
  */
 const App = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000); // 1 seconde de rotation fluide avant le rechargement
+  };
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -97,12 +106,13 @@ const App = () => {
               {/* Bouton de rafraîchissement flottant pour mobile uniquement */}
               {isMobile && (
                 <button
-                  onClick={() => window.location.reload()}
-                  className="fixed bottom-6 right-6 z-[9999] p-4 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-2xl hover:scale-105 active:scale-95 transition-all text-primary flex items-center justify-center"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="fixed bottom-6 right-6 z-[9999] p-4 rounded-full bg-card/90 backdrop-blur-xl border border-border/50 shadow-2xl hover:scale-105 active:scale-95 transition-all text-primary flex items-center justify-center disabled:opacity-80"
                   style={{ boxShadow: "0 8px 30px rgba(239, 68, 68, 0.2)" }}
                   aria-label="Refresh Page"
                 >
-                  <RotateCw size={24} />
+                  <RotateCw size={24} className={isRefreshing ? "animate-spin" : ""} />
                 </button>
               )}
             </LiveRadioProvider>
