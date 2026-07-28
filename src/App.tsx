@@ -11,6 +11,7 @@ import { LiveRadioProvider } from "@/context/LiveRadioContext"; // Moteur Audio 
 import { Capacitor } from "@capacitor/core";
 import { StatusBar } from "@capacitor/status-bar";
 import { RotateCw } from "lucide-react";
+import { CapacitorUpdater } from "@capgo/capacitor-updater";
 
 // --- Importations des Pages du site ---
 import Index from "./pages/Index.tsx"; // Page d'accueil
@@ -65,6 +66,10 @@ const App = () => {
       // Mode plein écran au lancement : Masquer la barre de statut
       StatusBar.hide().catch((err) => {
         console.warn("Impossible de masquer la barre de statut :", err);
+      });
+      // Signaler à Capgo que la mise à jour s'est chargée avec succès
+      CapacitorUpdater.notifyAppReady().catch((err) => {
+        console.warn("Capgo notifyAppReady error:", err);
       });
     }
   }, []);
