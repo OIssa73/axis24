@@ -88,6 +88,37 @@ const TVSection = ({ title = "TÉLÉVISION AXIS24", subtitle = "Retrouvez toutes
           <p className="text-muted-foreground max-w-2xl mx-auto mt-4">{t(subtitle)}</p>
         </motion.div>
 
+        {/* --- LECTEUR TV EN DIRECT (DIRECT STREAM) --- */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-4xl mx-auto mb-12"
+        >
+          <div className="bg-card border border-border/80 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-primary font-bold text-xs sm:text-sm uppercase tracking-wider">
+                <span className="w-3 h-3 rounded-full bg-primary animate-pulse shadow-sm shadow-primary/50" /> TV en Direct
+              </div>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-bold uppercase tracking-widest bg-muted px-3 py-1 rounded-full border border-border">
+                Africanews Français • Direct 24/7
+              </span>
+            </div>
+            
+            {/* Conteneur d'intégration responsive (16:9) */}
+            <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border/50 bg-black">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/b6R9-7KZ8YM"
+                title="Africanews français en direct - Info et actualités en continu"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </motion.div>
+
         {/* --- ONGLETS DE CATÉGORIES (Vidéos) --- */}
         {categories.length > 1 && (
           <div className="flex flex-wrap justify-center gap-2 mb-12">
